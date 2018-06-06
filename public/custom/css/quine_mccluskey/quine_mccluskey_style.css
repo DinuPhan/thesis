@@ -1,0 +1,8 @@
+.row {
+	font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 21px;
+    color: #13a7f3;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%
+}
