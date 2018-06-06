@@ -1,0 +1,91 @@
+
+QWERT#1-------------------------------------------------------------FLOW-KARNAUGH-MAP.JS
+
+* Số biến mặc định = 2 
+* Biến mặc định = X Y Z T
+
+Bước 1: Khởi tạo bảng TruthTable và Kmap
+
+	Khi đó: Người dùng có thể tương tác trực tiếp lên bảng TruthTable hoặc Kmap để tìm công thức đa thức tối tiểu
+
+Bước 2: Người dùng thay đổi số biến thì cập nhật lại 2 bảng tương ứng.
+	Các bước gồm:
+	Bước 2.1: Khởi tạo lại bảng TruthTable và Kmap
+	Bước 2.2: Clear các công thức đã nhập trước đó
+	Bước 2.3: Hiển thị ra ngoài giao diện TruthTable, Kmap và biểu thức (nếu có)
+	Bước 2.4: Tìm công thức đa thức tối tiểu cho Kmap hiện tại
+	Bước 2.5: cập nhật lại giao diện
+
+--------------------------------------------------------------------/FLOW-KARNAUGH-MAP.JS
+
+
+
+
+QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-MAP.JS
+
+[Bước 1: Khởi tạo bảng TruthTable, Kmap và mảng kết quả Equation (công thức đa thức tối tiểu)]
+	+++ TRUTH TABLE +++
+	TruthTable sẽ có width và height tương ứng với số variables
+
+		Xét qua mỗi dòng từ i = 0 -> 2^số biến {
+			Khởi tạo 1 mảng 1 chiều (từng dòng trong TruthTable) chứa:
+				+ Số thứ tự của dòng (index)
+				+ Tên dòng dưới dạng nhị phân (name)
+				+ Tên của từng ô khi hiển thị dưới dạng button - dùng để tạo các HTML IDS (ButtonUIName). Cú pháp: TT + name
+				+ Tên của từng dòng - dùng để set màu và opacity của cả dòng (TTROWUIName). Cú pháp: TTROW + name
+
+				Xét qua mỗi cột từ j = 0 -> 2^số biến {
+					Khởi tạo giá trị 1 mảng 1 chiều (cho từng ô [i][j]) chứa
+					+ Giá trị bit tại ô đó là true hay false (Variable)
+					+ Tên (ký tự) của biến tại ô đó, dóng theo cột(Name)
+					+ Tên KMapEntry tương ứng của giá trị ô đang xét trong TruthTable (để tạo liên kết 2 chiều). Lúc khởi tạo, do chưa có Kmap nên tạm thời rỗng.
+				}
+		}
+
+	+++ KMap +++
+	Số lượng variables nằm ngang (XVariables) và dọc (YVariables) = 1/2 kích thước tương ứng của KMap
+
+		Xét từng dòng của Kmap w = 0 -> Kmap.width{
+			Khởi tạo 1 mảng 1 chiều (từng cột)
+			Xét từng cột của Kmap h = 0 -> Kmap.height{
+				Khởi tạo 1 mảng ứng theo từng ô, 1 ô Kmap sẽ chứa các thông tin:
+				+ Giá trị ban đầu khởi tạo tại ô đó (Kmap[w][h].Value = false)
+				
+				Nối các giá trị tại ô KMap (VD: 00, 01, 11) tới các chỉ mục (entry) tương ứng bên bảng TruthTable (VD: 0,1,3)
+				+ Chỉ mục TruthTable tương ứng (Kmap[w][h].TruthTableEntry = TruthTable[tương ứng])
+				+ Đồng thời, cập nhật lại KMapEntry của TruthTable trên luôn (lúc đầu do tạo TruthTable trước Kmap nên KMapEntry của TruthTable vẫn để rỗng => giờ có rồi thì cập nhật lại)
+				+ Tên của từng ô khi hiển thị dưới dạng button - dùng để tạo các HTML IDS (ButtonUIName). Cú pháp: KM + name (name lấy từ TruthTable)
+				+ Tên của từng dòng - dùng để set màu và opacity của cả dòng (TTROWUIName). Cú pháp: TD + name
+				+ Flag xem có được bao phủ chưa (.Covered): khởi tạo là false
+				+ Với mỗi ô trong Kmap, [.Variable] của ô đó chứa giá trị tương ứng của dòng và cột theo dạng mảng 1 chiều có 2 thành phần [Width, Height]. VD như: ô đầu tiên 1-1 thì giá trị là [true, true]
+			}	
+		}
+
+	+++ Equation +++
+		Khởi tạo mảng equation chứa công thức đa thức tối tiểu.
+
+		Khởi tạo i=0 -> 2^variables (VD: 2^4 biến = 16 công thức ứng với công thức của từng ô trong truthtable){
+			Mỗi Equation chứa:
+			+ HTML IDs của Button tại ô đó ("EQ"+ i)
+			+ Đoạn code HTML của các công thức đa thức (dùng để chỉnh style, set overline text)
+			+ Thông tin về tế bào trên Kmap ứng với công thức đó (tọa độ x y, kích thước wid hei và tỉ trọng của tế bào w)
+		}
+
+		Equation.UsedLength là số lượng các công thức thành phần trong đa thức tối tiểu kết quả.
+
+[Bước 2: Người dùng thay đổi số biến thì cập nhật lại 2 bảng tương ứng]
+
+	[Bước 2.1: Khởi tạo lại bảng TruthTable và Kmap]
+	Như ở Bước 1
+
+	[Bước 2.2: Clear các kết quả trước đó]
+	Duyệt qua từng Equation, set Tế bào (rect) = null và set số công thức kết quả (UsedLength) = 0
+
+	[Bước 2.3: Hiển thị ra ngoài giao diện TruthTable, Kmap và biểu thức (nếu có)]
+	
+	
+	[Bước 2.4: Tìm công thức đa thức tối tiểu cho Kmap hiện tại]
+	
+
+
+--------------------------------------------------------------/DETAILS- KARNAUGH-MAP.JS
