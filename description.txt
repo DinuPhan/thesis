@@ -82,10 +82,25 @@ QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-
 	Duyệt qua từng Equation, set Tế bào (rect) = null và set số công thức kết quả (UsedLength) = 0
 
 	[Bước 2.3: Hiển thị ra ngoài giao diện TruthTable, Kmap và biểu thức (nếu có)]
-	
+	Chỉnh sửa innerhtml của các div tương ứng
 	
 	[Bước 2.4: Tìm công thức đa thức tối tiểu cho Kmap hiện tại]
-	
+	Các bước tìm công thức đa thức tối tiểu (minimized equation) cho Kmap:
+		+ Bước 2.4.1: Khởi tạo 1 mảng chứa các tế bào (Rects) và set tất cả các flag isCovered = false cho tất cả các ô
+
+		+ Bước 2.4.2: 
+			Duyệt qua các ô trong Kmap, tìm các tế bào phủ các ô trong Kmap (các tế bào phù hợp là các tế bào mà tất cả các ô Kmap nó chứa đều có Value = 1 - tức là đã toggled) và thêm vào Rects
+			Tìm các tế bào từ lớn xuống bé (VD: tế bào 4x4, tế bào 4x2, tế bào 2,4...)
+
+			Tuy nhiên, xử lý riêng các tế bào có kích thước 2x1 và 1x2 để có được kết quả tối ưu:
+			Tìm các tế bào 2x1 và 1x2 rồi thêm vào Rects2x1
+
+		+ Bước 2.4.3: Sắp xếp 1 danh sách các tế bào của Rects và Rects2x1 ( phủ một lượng X các ô Kmap), để trả về tập các tế bào ít nhất cần để phủ hết X những ô Kmap đó.
+			Cách tìm cách phủ tốt nhất {
+				
+			}
+
+
 
 
 --------------------------------------------------------------/DETAILS- KARNAUGH-MAP.JS

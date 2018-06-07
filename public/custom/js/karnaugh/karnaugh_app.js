@@ -25,7 +25,6 @@ for (i=0; i<Math.pow(2,MaxVariableCount); i++)
 	Equation[i].Rect = null;					// 'rect' for term 
 	Equation.UsedLength=0;						// # of terms in current result function
 }
-console.log('Equation hien tai',Equation);
 
 Equation.UsedLength=1;
 Equation[0].Expression="0";
@@ -57,7 +56,6 @@ function InitializeTables(VarCount)
 			TruthTable[i][j].KMapEntry = null;
 		}
 	}
-	console.log('TruthTable',TruthTable);
 	KMap.XVariables = KMap.Width/2;
 	KMap.YVariables = KMap.Height/2;
 
@@ -250,6 +248,7 @@ function SearchRect( w,h, TestValue, Found, DoCover )
 			{
 				if (!IsCovered(Rect))
 				{
+					//append the yet to be Covered Rect to Found
 					Found[Found.length]=Rect;
 					if (DoCover) Cover(Rect, true);
 				}
@@ -351,7 +350,7 @@ function FindBestCoverage(Rects,AllRects)
     {
         AddRectWeight(Weights, Rects[i], 1);
     }
-	console.log('New Weights',Weights);
+	console.log('Weights Map',Weights);
 
     // generate a set of rects sorted by weight - but  after selecting each minimal
     // weighted rect, re-weight the map for the next selection.  Re-weight by
@@ -413,7 +412,7 @@ function Search()
     var Rects2x1 = new Array();
     SearchRect(2, 1, true, Rects2x1, false);
     SearchRect(1, 2, true, Rects2x1, false);
-    console.log('Rects2x1',Rects2x1, 'Rects',Rects );
+    console.log('Rects2x1',Rects2x1, 'Rects',Rects , 'Kmap', KMap);
     FindBestCoverage(Rects2x1, Rects);
 
     // add the 1x1 rects
