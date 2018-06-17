@@ -9,25 +9,27 @@ var AllowDontCare=false;						// true doesn't guarantee a minimal solution
 var DontCare = "X";
 
 // Variables (initialized here)
-var VariableCount=2;							//1..4
+var VariableCount=4;							//1..4
 var TruthTable = new Array();					// truth table structure[row][variable]
 var KMap = new Array();							// KMap[across][down]
-var Equation = new Array();						// solution results 
+var SolEquation = new Array();					// solution results (minimized equation) 
+var LargeRects = new Array();					// All the rects found in step 1
 var FunctionText = "";							// F(ABC)= 
 var EquationHighlightColor = "rgb(243,194,86)";
 var Heavy = 20;
 
 for (i=0; i<Math.pow(2,MaxVariableCount); i++)
 {
-	Equation[i] = new Array();					// for each term in result function
-	Equation[i].ButtonUIName = "EQ" + i;		// used to generate HTML IDs
-	Equation[i].Expression = "";				// HTML text for term 
-	Equation[i].Rect = null;					// 'rect' for term 
-	Equation.UsedLength=0;						// # of terms in current result function
+	SolEquation[i] = new Array();				// for each term in result function
+	SolEquation[i].ButtonUIName = "EQ" + i;		// used to generate HTML IDs
+	SolEquation[i].Expression = "";				// HTML text for term 
+	SolEquation[i].Rect = null;					// 'rect' for term 
+	SolEquation.NumOfTerms=0;					// # of terms in current result function
 }
 
-Equation.UsedLength=1;
-Equation[0].Expression="0";
+SolEquation.NumOfTerms=1;
+SolEquation[0].Expression="0";
+
 
 // initialize the truth table and kmap structure for the given number of variables
 function InitializeTables(VarCount)
@@ -49,10 +51,8 @@ function InitializeTables(VarCount)
 		for (j=0; j<Math.pow(2,VariableCount); j++)
 		{
 			TruthTable[i][j] = new Array();
-			// console.log('i', i, 'j', j, 'Variable:', VariableCount-(1+j), 1<<(VariableCount-(1+j)),i,(i & (1<<(VariableCount-(1+j)))?1:0),(i & (1<<(VariableCount-(1+j)))?1:0)?true:false);
 			TruthTable[i][j].Variable = (i & (1<<(VariableCount-(1+j)))?1:0)?true:false;
 			TruthTable[i][j].Name = VariableNames[j];
-			// console.log('i', i, 'j', j,'variable names', TruthTable[i][j].Name );
 			TruthTable[i][j].KMapEntry = null;
 		}
 	}
@@ -350,7 +350,6 @@ function FindBestCoverage(Rects,AllRects)
     {
         AddRectWeight(Weights, Rects[i], 1);
     }
-	console.log('Weights Map',Weights);
 
     // generate a set of rects sorted by weight - but  after selecting each minimal
     // weighted rect, re-weight the map for the next selection.  Re-weight by
@@ -375,7 +374,6 @@ function FindBestCoverage(Rects,AllRects)
         }
         // Make the weight map very heavy for the selected Rect's squares
         AddRectWeight(Weights, Rects[0], Heavy);
-        
         // Reduce the weight for Rects that overlap the selected Rect
         for (j=0; j< Rects.length; j++)
         {
@@ -412,12 +410,16 @@ function Search()
     var Rects2x1 = new Array();
     SearchRect(2, 1, true, Rects2x1, false);
     SearchRect(1, 2, true, Rects2x1, false);
-    console.log('Rects2x1',Rects2x1, 'Rects',Rects , 'Kmap', KMap);
-    FindBestCoverage(Rects2x1, Rects);
+    // console.log('---------------');
+    // console.log('Rects2x1',Rects2x1, 'Rects',Rects);
 
+    // Collect all the larger rectangles
+    LargeRects = Rects.concat(Rects2x1);
+    console.log('LargeRects',LargeRects);
+    FindBestCoverage(Rects2x1, Rects);
+    
     // add the 1x1 rects
     SearchRect(1, 1, true, Rects, true);
-
     //check to see if any sets of (necessary) smaller rects fully cover larger ones (if so, the larger one is no longer needed)
     Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
     for (i = Rects.length - 1; i >= 0; i--)
@@ -433,31 +435,33 @@ function Search()
     }
 	
 	ClearEquation();	
+
 	for (i=0;i<Rects.length; i++)
 	{
 		if (Rects[i]!=null)
 		{
-			RectToEquation(Rects[i]);
+			//transfer from Rect to equations (minterms) and add to SolEquation
+			RectToEquation(Rects[i],SolEquation);
 		}
 	}
-	if (Equation.UsedLength==0)
+	if (SolEquation.NumOfTerms==0)
 	{
-		Equation.UsedLength=1;
-		Equation[0].Expression="0";
-		Equation[0].Rect = CreateRect(0,0,KMap.Width,KMap.Height);
+		SolEquation.NumOfTerms=1;
+		SolEquation[0].Expression="0";
+		SolEquation[0].Rect = CreateRect(0,0,KMap.Width,KMap.Height);
 	}
 }
 
 function ClearEquation()
 {
-	for (i=0; i<Equation.length; i++)
+	for (i=0; i<SolEquation.length; i++)
 	{
-		Equation[i].Rect	= null;
+		SolEquation[i].Rect	= null;
 	}
-	Equation.UsedLength=0;
+	SolEquation.NumOfTerms=0;
 }
 
-// returns true if the rect is entirely within a singel given variable 
+// returns true if the rect is entirely within a single given variable 
 function IsConstantVariable( Rect, Variable )
 {
 	var dx=0;
@@ -477,8 +481,8 @@ function IsConstantVariable( Rect, Variable )
 	return true;
 }
 
-// Turns a rectangle into a text minterm (in HTML)
-function RectToEquation( Rect )
+// Turns a rectangle into a text minterm (in HTML) and store it into the desired equation array
+function RectToEquation( Rect, EquationArr)
 {
 	var Text = "";
 	var i=0;
@@ -486,11 +490,11 @@ function RectToEquation( Rect )
 	{
 		if (IsConstantVariable( Rect, i))
 		{
-		//	Text += VariableNames[i];
-		//	if (!KMap[Rect.x][Rect.y].Variable[i])
-		//	{
-		//		Text += "'";
-		//	}
+			// Text += VariableNames[i];
+			// if (!KMap[Rect.x][Rect.y].Variable[i])
+			// {
+			// 	Text += "'";
+			// }
 			if (!KMap[Rect.x][Rect.y].Variable[i])
 			{
 				Text += "<span style='text-decoration: overline'>"+VariableNames[i]+"</span> ";
@@ -505,10 +509,11 @@ function RectToEquation( Rect )
 	{
 		Text="1";
 	}
-	Equation[Equation.UsedLength].Rect  = Rect;
-	Equation[Equation.UsedLength].Expression = Text;
-	Equation.UsedLength++;
-	
+	if (EquationArr == SolEquation){
+		EquationArr[EquationArr.NumOfTerms].Rect  = Rect;
+		EquationArr[EquationArr.NumOfTerms].Expression = Text;
+		EquationArr.NumOfTerms++;
+	}
 	return Text;
 }
 	
@@ -525,6 +530,36 @@ function DisplayValue( bool )
 		return "0";
 	}
 	else return DontCare;
+}
+
+// Check to see if the cell KMap[w][h] is in the current LargeRect[index] or not
+function CheckValue(w,h,index)
+{
+	var MaxX = LargeRects[index].x + LargeRects[index].w -1;
+	var MinX = LargeRects[index].x;
+	var MaxY = LargeRects[index].y + LargeRects[index].h -1;
+	var MinY = LargeRects[index].y;
+	if (MaxY >= KMap.Height && MaxX < KMap.Width){
+		if (MinX <= w && w <= MaxX && ( (h <= (MaxY % KMap.Height)) || ((MinY <= h) && (h <= (KMap.Height-1)))  ) ){
+			return 1;
+		}
+	}
+	else if (MaxX >= KMap.Width && MaxY < KMap.Height){
+		if (MinY <= h && h <= MaxY && ( (w <= (MaxX % KMap.Width)) || ((MinX <= w) && (w <= (KMap.Width-1))) ) ){
+			return 1;
+		}
+	}
+	else if (MaxY >= KMap.Height && MaxX >= KMap.Width){
+		if ( ( (w <= (MaxX % KMap.Width)) || ((MinX <= w) && (w <= (KMap.Width-1))) ) &&  ( (h <= (MaxY % KMap.Height)) || ((MinY <= h) && (h <= (KMap.Height-1)))  )){
+			return 1;
+		}
+	}
+	else {
+		if (MinX <= w && w <= MaxX && MinY <= h && h <= MaxY){
+			return 1;
+		}
+	}
+	return 0;
 }
 
 // Turns a number into binary in text (prepends 0's to length 'bits')
@@ -561,6 +596,7 @@ function UpdateUI()
         SetBackgroundColor(TruthTable[i].KMapEntry.TDUIName, HighlightColor(Val));
     }
     SetInnerHTML("EquationDiv", GenerateEquationHTML());
+    SetInnerHTML("Step_1",GenerateStep1HTML());
 }
 	
 function ToggleValue( Value )
@@ -634,7 +670,7 @@ function SetShowRect( EquationEntry, EquationIndex )
             }
         }
 	}
-	SetBackgroundColor(Equation[EquationIndex].ButtonUIName,EquationHighlightColor);
+	SetBackgroundColor(SolEquation[EquationIndex].ButtonUIName,EquationHighlightColor);
 }
 
 function GetElement(Name)
@@ -710,7 +746,7 @@ function GenerateTruthTableHTML()
 	return Text;
 }
 
-function GenerateKarnoMapHTML()
+function GenerateKMapHTML()
 {
 	var Text = "<table><thead><tr>";
 	var h,w;
@@ -767,24 +803,67 @@ function GenerateKarnoMapHTML()
 	return Text;
 }
 
+function GenerateStep1KMapHTML(index) 
+{
+	var Text = "<table>"
+	
+	for (h=0; h<KMap.Height; h++)
+	{
+		if (h % 2 != 0)
+		{ 
+			var opacity = 0.85;
+		}else{
+			var opacity = 0.8;
+		}
+		Text = Text + "<tr style=\"opacity:" +opacity + "\">";
+		
+		for (w=0; w<KMap.Width; w++)
+		{
+			if(CheckValue(w,h,index) == 0){
+				Text += "<td style='background-color: rgb(0, 195, 151); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
+			}
+			else{
+				Text += "<td style='background-color: rgb(200, 90, 60); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
+			}
+		}
+		Text += "</tr>";
+	}
+	Text +="</table>";
+	return Text;
+}
+
 
 function GenerateEquationHTML()
 {
 	var j;
 	var i;
-	for (i=0; i<Equation.UsedLength; )
+	for (i=0; i<SolEquation.NumOfTerms; )
 	{
 		var Text = "<p class=\"header-color remove-bottom\">";
-		for (j=0; (j < 8) && (i<Equation.UsedLength); j++)
+		for (j=0; (j < 8) && (i<SolEquation.NumOfTerms); j++)
 		{
 			if (i==0) Text+= "<b>"+FunctionText + " = ";
-			Text += "<span class=\"blue button half-bottom\" id=\""+Equation[i].ButtonUIName + "\" onMouseOver=\"SetShowRect(Equation["+i+"],"+i+");\" onMouseOut=\"SetShowRect(null);\" style=\"padding:5px\">";
-			Text += "<b>" + Equation[i].Expression + "</span>";
-			if (i<Equation.UsedLength-1) Text +=" <span> + </span>";
+			Text += "<span class=\"blue button half-bottom\" id=\""+SolEquation[i].ButtonUIName + "\" onMouseOver=\"SetShowRect(SolEquation["+i+"],"+i+");\" onMouseOut=\"SetShowRect(null);\" style=\"padding:5px\">";
+			Text += "<b>" + SolEquation[i].Expression + "</span>";
+			if (i<SolEquation.NumOfTerms-1) Text +=" <span> + </span>";
 			i++;
 		}	
-		Text += "</p>"
+		Text += "</p>";
 	}
+	return Text;
+}
+
+function GenerateStep1HTML(){
+	var i;
+	var Text = "<p class=\"header-color remove-bottom\"><b>Bước 1:</b> Biểu đồ Karnaugh của <i>f</i> có "+LargeRects.length+" tế bào lớn:";
+	for (i = 0; i < LargeRects.length; i++){
+		Text += "<div class=\"Step1KMaps\">" + GenerateStep1KMapHTML(i);
+		Text += "<span class=\"caption\">";
+		if(LargeRects[i]!=null){
+			Text += RectToEquation(LargeRects[i])+"</span></div>";
+		}
+	}
+	Text += "</p>";
 	return Text;
 }
 
@@ -793,12 +872,13 @@ function ChangeVariableNumber( Num )
 	InitializeTables(Num);
 	ClearEquation();
 	SetInnerHTML("TruthTableDiv",GenerateTruthTableHTML());
-	SetInnerHTML("KarnoMapDiv",GenerateKarnoMapHTML());
+	SetInnerHTML("KarnoMapDiv",GenerateKMapHTML());
 	SetInnerHTML("EquationDiv",GenerateEquationHTML());
 	GetElement("TwoVariableRB").checked   = (Num==2)?true:false;
 	GetElement("ThreeVariableRB").checked = (Num==3)?true:false;
 	GetElement("FourVariableRB").checked  = (Num==4)?true:false;
 	Search();
+	SetInnerHTML("Step_1",GenerateStep1HTML());
 	UpdateUI();
 }
 
@@ -846,7 +926,7 @@ document.getElementById('variablenames').addEventListener('change', function() {
 			InitializeTables(VariableCount);
 			ClearEquation();
 			SetInnerHTML("TruthTableDiv",GenerateTruthTableHTML());
-			SetInnerHTML("KarnoMapDiv",GenerateKarnoMapHTML());
+			SetInnerHTML("KarnoMapDiv",GenerateKMapHTML());
 			SetInnerHTML("EquationDiv",GenerateEquationHTML());
 			GetElement("TwoVariableRB").checked   = (VariableCount==2)?true:false;
 			GetElement("ThreeVariableRB").checked = (VariableCount==3)?true:false;
@@ -860,5 +940,6 @@ document.getElementById('variablenames').addEventListener('change', function() {
 			this.value = "";
 		}
 	}
-	//
 });
+
+

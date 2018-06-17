@@ -65,6 +65,13 @@
 					</div>
 				</div>
 			</div>
+
+			<div class="sixteen columns well add-bottom">
+				<p class="StepByStep">
+					<div id="Step_1">
+					</div>
+				</p>
+			</div>
 		</div>
 	</div>    
 @endsection

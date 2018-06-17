@@ -90,13 +90,23 @@ QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-
 
 		+ Bước 2.4.2: 
 			Duyệt qua các ô trong Kmap, tìm các tế bào phủ các ô trong Kmap (các tế bào phù hợp là các tế bào mà tất cả các ô Kmap nó chứa đều có Value = 1 - tức là đã toggled) và thêm vào Rects
-			Tìm các tế bào từ lớn xuống bé (VD: tế bào 4x4, tế bào 4x2, tế bào 2,4...)
+			Tìm các tế bào từ lớn xuống bé (VD: tế bào 4x4, tế bào 4x2, tế bào 2,4...). Nếu tìm ra tế bào phù hợp thì đánh dấu đã Covered vào tất cả các ô thuộc tế bào đó.
 
 			Tuy nhiên, xử lý riêng các tế bào có kích thước 2x1 và 1x2 để có được kết quả tối ưu:
 			Tìm các tế bào 2x1 và 1x2 rồi thêm vào Rects2x1
 
 		+ Bước 2.4.3: Sắp xếp 1 danh sách các tế bào của Rects và Rects2x1 ( phủ một lượng X các ô Kmap), để trả về tập các tế bào ít nhất cần để phủ hết X những ô Kmap đó.
 			Cách tìm cách phủ tốt nhất {
+				Khởi tạo một ma trận tỉ trọng (weight) ứng với Kmap hiện tại: các ô chưa bị covered ở bước 2.4.2 thì cho = 0, còn nếu đã bị covered (tức thuộc 1 tế bào lớn nào đó có có kích thước 4 ô) thì gán cho 1 giá trị lớn (heavy) = 20.
+
+				Duyệt qua các rect trong Rects: tăng weight tại các ô mà tế bào rect phủ qua (chồng lấn nhau cũng được).
+
+				Ý tưởng tìm ra các tế bào phủ tối ưu:
+				+ Tạo ra 1 tập các tế bào được xếp giảm dần theo tỉ trọng (weight).
+				+ Mõi lần chọn ra 1 tế bào A trên cùng (có tỉ trọng nhỏ nhất) để thêm vào tập minimal equation. 
+				+ Sau đó, tính lại weight bằng cách tăng mạnh weight những ô được phủ bởi tế bào A trên nhưng đồng thời cũng giảm weight cho các ô thuộc các tế bào nằm chồng lắp với tế bào A.
+				=> Nhờ đó, đẩy các tế bào vùng phủ bị trùng lắp về cuối và làm nổi lên các tế bào lớn nhất, không trùng lắp với tế bào A lên trên.
+
 				
 			}
 
