@@ -15,6 +15,7 @@
         {{Html::style('custom/css/animate.min.css')}}
         {{Html::style('custom/css/custom-bootstrap-dashboard.css')}}
         {{Html::style('custom/css/pe-icon-7-stroke.css')}}
+        {{Html::style('custom/css/backtotop_style.css')}}
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
         <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
         @yield('extra-style')
@@ -36,11 +37,10 @@
         </div>
 
         @include('partials.footer')
-
     </div>
+    <a href="#0" class="cd-top js-cd-top">Top</a>   
 </div>
-
-
+ 
 </body>
     
     @section('script')
@@ -50,6 +50,7 @@
         {{Html::script('custom/js/chartist.min.js')}}
         {{Html::script('custom/js/bootstrap-notify.js')}}
         {{Html::script('custom/js/custom-bootstrap-dashboard.js')}}
+        {{Html::script('custom/js/backtotop.js')}}
         @yield('extra-script')
     @show
 </html>

@@ -331,7 +331,7 @@ function OverlappingRects(R1,R2)
 
 // Sorts a list of Rects that cover squares of the KMap, and returns a minimal
 // subset of those Rects that cover the same squares
-function FindBestCoverage(Rects,AllRects)
+function FindBestCoverage(Rects2x1,AllRects)
 {
     // create a 'Weight' map
     var Weights = new Array();
@@ -344,13 +344,15 @@ function FindBestCoverage(Rects,AllRects)
         }
     }
     
+    
     // seed the weight map with 1 for every square covered by every Rect
     var i = 0;
-    for (i = 0; i < Rects.length; i++)
+    for (i = 0; i < Rects2x1.length; i++)
     {
-        AddRectWeight(Weights, Rects[i], 1);
+        AddRectWeight(Weights, Rects2x1[i], 1);
     }
 
+    console.log('Weight',Weights);
     // generate a set of rects sorted by weight - but  after selecting each minimal
     // weighted rect, re-weight the map for the next selection.  Re-weight by
     // making the squares of the selected Rect very heavy, but reduce the
@@ -358,32 +360,33 @@ function FindBestCoverage(Rects,AllRects)
     // effect of pushing the rects that duplicate KMap coverage to the back of the list, 
     // while bubbling non-overlapping maximal covering rects to the front.
     var SortedRects = new Array();
-    while (Rects.length>0)
+    while (Rects2x1.length>0)
     {
         var j=0;
-        for (j = 0; j < Rects.length; j++)
+        for (j = 0; j < Rects2x1.length; j++)
         {   // get the weight for the remaining Rects
-            Rects[j].Weight = GetRectWeight(Weights, Rects[j]);
+            Rects2x1[j].Weight = GetRectWeight(Weights, Rects2x1[j]);
         }
         // Sort the array to find a Rect with minimal weight
-        Rects.sort(SortByWeight);
-        SortedRects.push(Rects[0]);
-        if (Rects.length == 1)
+        Rects2x1.sort(SortByWeight);
+        console.log('Da pushed',Rects2x1[0]);
+        SortedRects.push(Rects2x1[0]);
+        if (Rects2x1.length == 1)
         {   // just found the last Rect, break out
             break;
         }
         // Make the weight map very heavy for the selected Rect's squares
-        AddRectWeight(Weights, Rects[0], Heavy);
+        AddRectWeight(Weights, Rects2x1[0], Heavy);
         // Reduce the weight for Rects that overlap the selected Rect
-        for (j=0; j< Rects.length; j++)
+        for (j=0; j< Rects2x1.length; j++)
         {
-            if (OverlappingRects(Rects[0], Rects[j]))
+            if (OverlappingRects(Rects2x1[0], Rects2x1[j]))
             {
-                AddRectWeight(Weights, Rects[j], -1);
+                AddRectWeight(Weights, Rects2x1[j], -1);
             }
         }
         // continue processing with all the Rects but the first one
-        Rects = Rects.slice(1);
+        Rects2x1 = Rects2x1.slice(1);
     }
     
     // determine which of the sorted array of Rects are actually needed
@@ -411,28 +414,28 @@ function Search()
     SearchRect(2, 1, true, Rects2x1, false);
     SearchRect(1, 2, true, Rects2x1, false);
     // console.log('---------------');
-    // console.log('Rects2x1',Rects2x1, 'Rects',Rects);
+    console.log('Rects2x1',Rects2x1, 'Rects',Rects, 'Kmap',KMap);
 
     // Collect all the larger rectangles
     LargeRects = Rects.concat(Rects2x1);
-    console.log('LargeRects',LargeRects);
+    // console.log('LargeRects',LargeRects);
     FindBestCoverage(Rects2x1, Rects);
     
-    // add the 1x1 rects
-    SearchRect(1, 1, true, Rects, true);
-    //check to see if any sets of (necessary) smaller rects fully cover larger ones (if so, the larger one is no longer needed)
-    Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
-    for (i = Rects.length - 1; i >= 0; i--)
-    {
-        if (IsCovered(Rects[i]))
-        {
-            Rects[i] = null;
-        }
-        else
-        {
-            Cover(Rects[i], true);
-        }
-    }
+    // // add the 1x1 rects
+    // SearchRect(1, 1, true, Rects, true);
+    // //check to see if any sets of (necessary) smaller rects fully cover larger ones (if so, the larger one is no longer needed)
+    // Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
+    // for (i = Rects.length - 1; i >= 0; i--)
+    // {
+    //     if (IsCovered(Rects[i]))
+    //     {
+    //         Rects[i] = null;
+    //     }
+    //     else
+    //     {
+    //         Cover(Rects[i], true);
+    //     }
+    // }
 	
 	ClearEquation();	
 
@@ -532,34 +535,34 @@ function DisplayValue( bool )
 	else return DontCare;
 }
 
-// Check to see if the cell KMap[w][h] is in the current LargeRect[index] or not
-function CheckValue(w,h,index)
+// Check to see if the cell KMap[w][h] is covered by the LargeRect or not
+function isCoveredByRectIndex(w,h,LargeRect)
 {
-	var MaxX = LargeRects[index].x + LargeRects[index].w -1;
-	var MinX = LargeRects[index].x;
-	var MaxY = LargeRects[index].y + LargeRects[index].h -1;
-	var MinY = LargeRects[index].y;
+	var MaxX = LargeRect.x + LargeRect.w -1;
+	var MinX = LargeRect.x;
+	var MaxY = LargeRect.y + LargeRect.h -1;
+	var MinY = LargeRect.y;
 	if (MaxY >= KMap.Height && MaxX < KMap.Width){
 		if (MinX <= w && w <= MaxX && ( (h <= (MaxY % KMap.Height)) || ((MinY <= h) && (h <= (KMap.Height-1)))  ) ){
-			return 1;
+			return true;
 		}
 	}
 	else if (MaxX >= KMap.Width && MaxY < KMap.Height){
 		if (MinY <= h && h <= MaxY && ( (w <= (MaxX % KMap.Width)) || ((MinX <= w) && (w <= (KMap.Width-1))) ) ){
-			return 1;
+			return true;
 		}
 	}
 	else if (MaxY >= KMap.Height && MaxX >= KMap.Width){
 		if ( ( (w <= (MaxX % KMap.Width)) || ((MinX <= w) && (w <= (KMap.Width-1))) ) &&  ( (h <= (MaxY % KMap.Height)) || ((MinY <= h) && (h <= (KMap.Height-1)))  )){
-			return 1;
+			return true;
 		}
 	}
 	else {
 		if (MinX <= w && w <= MaxX && MinY <= h && h <= MaxY){
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 // Turns a number into binary in text (prepends 0's to length 'bits')
@@ -819,7 +822,7 @@ function GenerateStep1KMapHTML(index)
 		
 		for (w=0; w<KMap.Width; w++)
 		{
-			if(CheckValue(w,h,index) == 0){
+			if(isCoveredByRectIndex(w,h,LargeRects[index]) == false){
 				Text += "<td style='background-color: rgb(0, 195, 151); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
 			}
 			else{

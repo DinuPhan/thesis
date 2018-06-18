@@ -89,8 +89,8 @@ QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-
 		+ Bước 2.4.1: Khởi tạo 1 mảng chứa các tế bào (Rects) và set tất cả các flag isCovered = false cho tất cả các ô
 
 		+ Bước 2.4.2: 
-			Duyệt qua các ô trong Kmap, tìm các tế bào phủ các ô trong Kmap (các tế bào phù hợp là các tế bào mà tất cả các ô Kmap nó chứa đều có Value = 1 - tức là đã toggled) và thêm vào Rects
-			Tìm các tế bào từ lớn xuống bé (VD: tế bào 4x4, tế bào 4x2, tế bào 2,4...). Nếu tìm ra tế bào phù hợp thì đánh dấu đã Covered vào tất cả các ô thuộc tế bào đó.
+			Duyệt qua các ô trong Kmap, tìm các tế bào lớn phủ các ô đã được toggled trong Kmap (các tế bào phù hợp là các tế bào mà tất cả các ô Kmap nó chứa đều có Value = 1 - tức là đã toggled) và thêm vào Rects
+			Tìm các tế bào từ lớn xuống bé (VD: tế bào 4x4, tế bào 4x2, tế bào 2,4...). Đánh dấu đã Covered vào tất cả các ô của mỗi tế bào lớn đó (đánh dấu là đã bị phủ bởi 1 tế bào nào đó).
 
 			Tuy nhiên, xử lý riêng các tế bào có kích thước 2x1 và 1x2 để có được kết quả tối ưu:
 			Tìm các tế bào 2x1 và 1x2 rồi thêm vào Rects2x1
@@ -114,3 +114,7 @@ QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-
 
 
 --------------------------------------------------------------/DETAILS- KARNAUGH-MAP.JS
+
+
+
+

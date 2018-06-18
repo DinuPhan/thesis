@@ -9,52 +9,52 @@
 
         <div class="sidebar-wrapper">
             <div class="logo">
-                <div class= "simple-text"> Graduation Thesis </div>
+                <div class= "simple-text"> Boolo Solver </div>
             </div>
 
             <ul class="nav">
                 <li>
                     <a href="{{route('home')}}">
                         <i class="pe-7s-home"></i> 
-                        <p>Home</p>
+                        <p>Trang chủ</p>
                     </a> 
                 </li>
                 <li>
                     <a class="dropdown">
                         <i class="pe-7s-calculator"></i> 
-                        <p>Boolean function Solver</p>
+                        <p>Công thức đa thức tối tiểu</p>
                     </a> 
                     <div class="dropdown-container">
                         <a href="{{route('karnaughsolver')}}">
                             <i class="pe-7s-angle-right"></i>
-                            <p>Karnaugh map</p>
+                            <p>PP biểu đồ Karnaugh</p>
                         </a>
                         <a href="{{route('quinemccluskey')}}">
                             <i class="pe-7s-angle-right"></i>
-                            <p>Quine Mccluskey</p>
+                            <p>PP Quine Mccluskey</p>
                         </a>
                     </div>
                 </li>
                 <li>
                     <a class="dropdown">
                         <i class="pe-7s-usb"></i> 
-                        <p>Logic Proposition Solver</p>
+                        <p>Biểu thức logic</p>
                     </a> 
                     <div class="dropdown-container">
                         <a href="#">
                             <i class="pe-7s-angle-right"></i>
-                            <p>Check an inference</p>
+                            <p>Kiểm tra suy luận</p>
                         </a>
                          <a href="#">
                             <i class="pe-7s-angle-right"></i>
-                            <p>Simplify expressions</p>
+                            <p>Rút gọn biểu thức</p>
                         </a>
                     </div>
                 </li>
                 <li>
                     <a href="{{route('info')}}">
                         <i class="pe-7s-info"></i> 
-                        <p>About</p>
+                        <p>Thông tin</p>
                     </a> 
                 </li>
             </ul>
