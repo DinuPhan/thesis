@@ -9,7 +9,9 @@
 
         <div class="sidebar-wrapper">
             <div class="logo">
-                <div class= "simple-text"> Boolo Solver </div>
+                <div class= "simple-image-logo">
+                    <img class= "img-responsive" src="https://image.ibb.co/ikfnny/boolo.png">
+                </div>
             </div>
 
             <ul class="nav">

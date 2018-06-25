@@ -53,24 +53,31 @@
 					</label>
 				</div>
 				
-				<div class="eight columns add-bottom">    
+				<div class="eight columns add-bottom" style="display: block">    
 					<p class="pull-center"><b>Bảng chân trị</b></p>
 				    <div id="TruthTableDiv">
 					</div>     
 				</div>
 
-			    <div class="eight columns add-bottom">    
+			    <div class="eight columns add-bottom" style="display: block">    
 					<p class="pull-center"><b>Biểu đồ Karnaugh</b></p>
 				   	<div id="KarnoMapDiv">
 					</div>
 				</div>
 			</div>
 
-			<div class="sixteen columns well add-bottom">
-				<p class="StepByStep">
+			<div id="StepByStep">
+				<div class="sixteen columns well add-bottom">
+					<div class="header-color" style="text-align: center; font-size: 20px; font-weight: 600">Hướng dẫn từng bước</div>
 					<div id="Step_1">
 					</div>
-				</p>
+					<div id="Step_2">
+					</div>
+					<div id="Step_3">
+					</div>
+					<div id="Step_4">
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

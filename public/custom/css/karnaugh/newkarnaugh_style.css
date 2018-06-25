@@ -213,13 +213,13 @@ div .Step1KMaps{
     padding: 5px 10px !important;
 }
 
-img {
-    width: 80%;
-    height: 80%;
-    background-color: grey;
-}
-
 .caption {
     /* Make the caption a block so it occupies its own line. */
     display: block;
+}
+
+#StepByStep p{
+    color: #13a7f3;
+    padding: 5px 10px !important;
+    margin-bottom: 0 !important
 }
