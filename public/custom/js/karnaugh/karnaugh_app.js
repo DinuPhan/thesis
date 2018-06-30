@@ -352,7 +352,6 @@ function FindBestCoverage(Rects2x1,AllRects)
         Weights[w] = new Array();
         for (h = 0; h < KMap.Height; h++)
         {
-        	// Weights[w][h] = (KMap[w][h].Covered)?Heavy:0;
            	Weights[w][h] = 0;
         }
     }
@@ -410,8 +409,8 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    	}
 	    	var Step3_Combinations = new Array();
 	    	for (var i = 0; i < PossibleCombs.length; i++){
-	    		// Step3_Combinations.push(sortRectsByWeight(PossibleCombs[i]));
-	    		Step3_Combinations.push(PossibleCombs[i]);
+	    		Step3_Combinations.push(sortRectsByWeight(PossibleCombs[i]));
+	    		// Step3_Combinations.push(PossibleCombs[i]);
 	    	}
 	    	return Step3_Combinations;
 	    }
@@ -428,8 +427,6 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    }
     }    
 }
-
-//find Compulsory Rects given the current 
 
 	
 //Finds the minimized equation for the current KMap.
@@ -679,6 +676,7 @@ function determinePossibleCombs(LeftoverCells){
 	console.log('totalnodes',totalnodes);
 	console.log('explanation',explanation);
 	console.log('-------------');
+	console.log('resultsCombs',resultsCombs);
 	return resultsCombs;
 }
 
@@ -715,8 +713,6 @@ function findCombination(index, remainCells, availableRects, currentComb, result
 	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
  	
 }
-
-
 
 //Step 3 - List out all the Rects that is available to choose to cover the remaining cells (not include the Step2Rects)
 function ListAvailableRects(LeftoverCells){
@@ -795,7 +791,7 @@ function isKMapCovereByCurrentCombination(curComb){
 
 	for (let i = 0; i < KMap.Width; i++){
 		for (let j = 0; j <KMap.Height; j++){
-			if(KMap[i][j].Value == 1 && KMap[i][j].Covered == false){
+			if(KMap[i][j].Value == 1 && KMap[i][j].Covered == false && rectsCoveringCellAt(i,j).length > 0){
 				return false;
 			}
 		}
@@ -918,7 +914,7 @@ function sortRectsByWeight(Rects) {
     return SelectedRects;
 }
 
-
+//Return the index of minimal S.O.P expression
 function getMinimalIndex(Step4Equations){
 	if(Step4Equations.length > 2){
 		var minimalCombIndexes = new Array();
@@ -959,6 +955,19 @@ function getMinimalIndex(Step4Equations){
 }
 
 // redraws UI (with no highlights)
+
+function findUniqueCells(){
+	var uniquecells = new Array();
+	for (var i = 0; i < KMap.Width; i++){
+		for (var j = 0; j < KMap.Height; j++){
+			if(KMap[i][j].Value == 1 && rectsCoveringCellAt(i,j) == 0){
+				uniquecells.push({Rect:CreateRect(i,j,1,1),Pos: {x: j+1, y: i+1}});
+			}
+		}
+	}
+	return uniquecells;
+}
+
 function UpdateUI()
 {
     var i = 0;
