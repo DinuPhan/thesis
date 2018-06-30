@@ -15,7 +15,7 @@ var KMap = new Array();							// KMap[across][down]
 var SolEquation = new Array();					// solution results (minimized equation) 
 var FunctionText = "";							// F(ABC)= 
 var EquationHighlightColor = "rgb(243,194,86)";
-var Heavy = 20;
+var Heavy = 100;
 
 //Global variable for step by step explanation
 var LargeRects = new Array();					// Large rects (size of 4 and 2) found in step 1
@@ -25,6 +25,7 @@ var flagStep3 = false;							// Flag to see if the rects in step 2 coverted all 
 var LeftoverCells = new Array();
 var Step4Equations = new Array();				// Expressions of S.O.P in Step4
 
+var totalnodes = 0;
 
 for (i=0; i<Math.pow(2,MaxVariableCount); i++)
 {
@@ -364,47 +365,6 @@ function FindBestCoverage(Rects2x1,AllRects)
         AddRectWeight(Weights, LargeRects[i], 1);
     }
 
-    // // console.log('Current Weight',Weights);
-
-    // // generate a set of rects sorted by weight - but  after selecting each minimal
-    // // weighted rect, re-weight the map for the next selection.  Re-weight by
-    // // making the squares of the selected Rect very heavy, but reduce the
-    // // weight of any squares for Rects that overlap the selected Rect.  This has the
-    // // effect of pushing the rects that duplicate KMap coverage to the back of the list, 
-    // // while bubbling non-overlapping maximal covering rects to the front.
-    // var SortedRects = new Array();
-    // while (Rects2x1.length>0)
-    // {
-    //     var j=0;
-    //     for (j = 0; j < Rects2x1.length; j++)
-    //     {   // get the weight for the remaining Rects
-    //         Rects2x1[j].Weight = GetRectWeight(Weights, Rects2x1[j]);
-    //     }
-    //     // Sort the array to find a Rect with minimal weight
-    //     Rects2x1.sort(SortByWeight);
-    //     SortedRects.push(Rects2x1[0]);
-    //     if (Rects2x1.length == 1)
-    //     {   // just found the last Rect, break out
-    //         break;
-    //     }
-    //     // Make the weight map very heavy for the selected Rect's squares
-    //     AddRectWeight(Weights, Rects2x1[0], Heavy);
-    //     // Reduce the weight for Rects that overlap the selected Rect
-    //     for (j=0; j< Rects2x1.length; j++)
-    //     {
-    //         if (OverlappingRects(Rects2x1[0], Rects2x1[j]))
-    //         {
-    //             AddRectWeight(Weights, Rects2x1[j], -1);
-    //         }
-    //     }
-    //     // continue processing with all the Rects but the first one
-    //     Rects2x1 = Rects2x1.slice(1);
-    // }
-    
-    // // determine which of the sorted array of Rects are actually needed
-    // TryRects(SortedRects, AllRects);
-
-
     // Step 2 - Find the minimalRects that cover the 1-weight cells (1-weight cells are the cells that belong only to 1 Rect)
     var dx = 0
     var dy = 0
@@ -423,44 +383,54 @@ function FindBestCoverage(Rects2x1,AllRects)
     }
     Step2Rects = step2_tempRects.slice(0); //clone from step2_tempRects to global scope Step2Rects
 
-    //Step 3 - if the minimal Rects found in Step 2 cannot covered the KMap, pick randomly an uncovered cell to continue with Step 3
-    //if the Kmap is Convered, jump to Step 4
-    if (isKMapCoveredBy(Weights,Step2Rects) == false){
-    	flagStep3 = true;
-
-    	LeftoverCells = findLeftoverCells(Weights);
-    	//Every leftover cell will store:
-		// 1) the position (.Pos)
-		// 2) Rects that is covering the leftover cell (more than 2 because leftover cells are not 1-weight cell) (.Rects)
-    	var Step3_Combinations = determinePossibleCombs(LeftoverCells);
-    	// Add the Step2_Rects to Step3 combination
-    	for (var i = 0; i < Step3_Combinations.length; i++){
-    		for (var j = 0; j < Step2Rects.length; j++){
-    			Step3_Combinations[i].unshift(Step2Rects[j].Rect);
-    		}
-    	}
-    	if(!isKMapCovereByCurrentCombination(Step3_Combinations)){
-			for (var i = 0; i < Step3_Combinations.length; i++){
-	    		addSoleRects1x1(Step3_Combinations[i]);
-	    	}
-    	}
-    	return Step3_Combinations;
-    }
-    else {
-    	//Step2Rects has already fully covered the KMap => return only 1 combination that have Step2Rects
-    	flagStep3 = false;
+    // If no 1-weight cell to be found => Sort the array by weight and find the Minimal S.O.P
+    if(LargeRects.length > 0 && Step2Rects.length == 0){
     	var Step2_Combination = new Array();
-    	var Combination = new Array();
-    	for (var i = 0; i < Step2Rects.length; i++){
-    		Combination.push(Step2Rects[i].Rect);
-    	}
-    	Step2_Combination.push(Combination);
-    	if(!isKMapCovereByCurrentCombination(Step2_Combination)){
-    		addSoleRects1x1(Step2_Combination);
-    	}
-    	return Step2_Combination;
+    	Step2_Combination.push(sortRectsByWeight(Rects2x1));
+	    return Step2_Combination;
     }
+    else { 
+    	//If there are 1-weight cells to be covered
+    	//Step 3 - if the minimal Rects found in Step 2 cannot covered the KMap, pick randomly an uncovered cell to continue with Step 3
+	    //if the Kmap is Convered, jump to Step 4
+	    if (isKMapCoveredBy(Weights,Step2Rects) == false){
+	    	flagStep3 = true;
+
+	    	LeftoverCells = findLeftoverCells(Weights);
+	    	//Every leftover cell will store:
+			// 1) the position (.Pos)
+			// 2) Rects that is covering the leftover cell (more than 2 because leftover cells are not 1-weight cell) (.Rects)
+	    	var PossibleCombs = determinePossibleCombs(LeftoverCells);
+	    	// Add the Step2_Rects to Step3 combination
+	    	for (var i = 0; i < PossibleCombs.length; i++){
+	    		// Because unshift append to the left => we append from last to top
+	    		for (var j = Step2Rects.length-1; j >= 0; j--){
+	    			PossibleCombs[i].unshift(Step2Rects[j].Rect);
+	    		}	
+	    	}
+	    	var Step3_Combinations = new Array();
+	    	for (var i = 0; i < PossibleCombs.length; i++){
+	    		// Step3_Combinations.push(sortRectsByWeight(PossibleCombs[i]));
+	    		Step3_Combinations.push(PossibleCombs[i]);
+	    	}
+	    	return Step3_Combinations;
+	    }
+	    else {
+	    	//Step2Rects has already fully covered the KMap => return only 1 combination that have Step2Rects
+	    	flagStep3 = false;
+	    	var Step2_Combination = new Array();
+	    	var Combination = new Array();
+	    	for (var i = 0; i < Step2Rects.length; i++){
+	    		Combination.push(Step2Rects[i].Rect);
+	    	}
+	    	Step2_Combination.push(Combination);
+	    	return Step2_Combination;
+	    }
+    }    
 }
+
+//find Compulsory Rects given the current 
+
 	
 //Finds the minimized equation for the current KMap.
 function Search()
@@ -487,55 +457,49 @@ function Search()
     LargeRects = Rects.concat(Rects2x1);
 
     // FindBestCoverage(Rects2x1, Rects);
-
     var BestCoverage = FindBestCoverage(Rects2x1, Rects);
 
-    //Clone the BestCoverage to global scope variables for displaying
+    //Clone the BestCoverage to global scope variables for manipulating
     Step4Equations = BestCoverage.slice(0);
 
-    // add the 1x1 rects
-    // SearchRect(1, 1, true, Rects, true);
+    // 1x1 sized rects 
+    for (var i = 0; i < BestCoverage.length; i++){
+    	SearchRect(1, 1, true, BestCoverage[i], false);
+    }
 
-    //check to see if any sets of (necessary) smaller rects fully cover larger ones (if so, the larger one is no longer needed)
- //    Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
- //    for (i = Rects.length - 1; i >= 0; i--)
- //    {
- //        if (IsCovered(Rects[i]))
- //        {
- //            Rects[i] = null;
- //        }
- //        else
- //        {
- //            Cover(Rects[i], true);
- //        }
- //    }
+    // check to see if any sets of (necessary) large rects fully cover smaller ones (if so, the smaller one is no longer needed)
+    //Iterate through the combinations, each combination: mark the unecessary ones and delete it.
+    for (var i = 0; i < BestCoverage.length; i++){
+    	Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
+    	var deleteIndexes = new Array();
+    	for (var j = 0; j < BestCoverage[i].length; j++)
+	    {
+	        if (IsCovered(BestCoverage[i][j]))
+	        {
+	            deleteIndexes.push(j);
+	        }
+	        else
+	        {
+	            Cover(BestCoverage[i][j], true);
+	        }
+	    }
+
+	    for (var k = 0; k < deleteIndexes.length; k++){
+	    	BestCoverage[i].splice(deleteIndexes[k]-k,1);
+	    }
+    }
 
 	ClearEquation();
 
-	// for (i = 0; i < Rects.length; i++)
-	// {
-	// 	if (Rects[i]!=null)
-	// 	{
-	// 		//transfer from Rect to equations (minterms) and add to SolEquation
-	// 		RectToEquation(Rects[i],SolEquation);
-	// 	}
-	// }
-	// if (SolEquation.NumOfTerms==0)
-	// {
-	// 	SolEquation.NumOfTerms=1;
-	// 	SolEquation[0].Expression="0";
-	// 	SolEquation[0].Rect = CreateRect(0,0,KMap.Width,KMap.Height);
-	// }
-	console.log('BestCoverage',BestCoverage);
-
 	if (BestCoverage.length != 0){
-		var tempRects = BestCoverage[0].slice(0);
-		for (i = 0; i < tempRects.length; i++)
+		var minimal = getMinimalIndex(Step4Equations);
+		var minimumSOP = BestCoverage[minimal].slice(0);
+		for (i = 0; i < minimumSOP.length; i++)
 		{
-			if (tempRects[i]!=null)
+			if (minimumSOP[i]!=null)
 			{
 				//transfer from Rect to equations (minterms) and add to SolEquation
-				RectToEquation(tempRects[i],SolEquation);
+				RectToEquation(minimumSOP[i],SolEquation);
 			}
 		}
 	}
@@ -586,11 +550,6 @@ function RectToEquation( Rect, EquationArr)
 	{
 		if (IsConstantVariable( Rect, i))
 		{
-			// Text += VariableNames[i];
-			// if (!KMap[Rect.x][Rect.y].Variable[i])
-			// {
-			// 	Text += "'";
-			// }
 			if (!KMap[Rect.x][Rect.y].Variable[i])
 			{
 				Text += "<span style='text-decoration: overline'>"+VariableNames[i]+"</span> ";
@@ -628,7 +587,7 @@ function DisplayValue( bool )
 	else return DontCare;
 }
 
-// Check to see if the KMap[w][h] cell is covered by the LargeRect or not 
+// Check to see if the cell at [w][h] of KMap is covered by the LargeRect or not 
 // Say in different way: Check to see whether a cell at position w,h belong to the given LargeRect
 function isCoveredByRectIndex(w,h,LargeRect)
 {
@@ -709,15 +668,57 @@ function findLeftoverCells(Weights){
 //Step 3 - List down all the possible options and evaluate to find the smallest coverage using Back-tracking method
 function determinePossibleCombs(LeftoverCells){
 	var remainCells = LeftoverCells.slice(0); 			// make a clone of LeftoverCells to feed to the backtracking
-	var availableRects = ListAvailableRects(LeftoverCells);
-	var resultsCombs = new Array();					// Store all the accepted combinations (results)
+	var availableRects = ListAvailableRects(LeftoverCells); // List of available rects (not include Step2Rects - compulsory rects)
+	var resultsCombs = new Array();						// Store all the accepted combinations (results)
 	var currentComb = new Array();
+	var startIndex = 0;
+	var explanation = new Array();
+	totalnodes = 0;
+	findCombination(startIndex, remainCells, availableRects, currentComb, resultsCombs, explanation);
 
-	findCombination(0, remainCells, availableRects, currentComb, resultsCombs);
+	console.log('totalnodes',totalnodes);
+	console.log('explanation',explanation);
+	console.log('-------------');
 	return resultsCombs;
 }
 
-//Step 3 - List out all the Rects that is available to choose to cover the remaining cells (exclude the Step2Rects)
+//Step 3 - Backtracking 
+function findCombination(index, remainCells, availableRects, currentComb, resultsCombs, explanation){
+ 	totalnodes++;
+
+	var curExplain = new Array(); // Initialize an explain
+
+ 	if (index > availableRects.length){
+ 		return;
+ 	}
+
+ 	if (isKMapCovereByCurrentCombination(currentComb)){
+ 		var temp = currentComb.slice(0);
+ 		resultsCombs.push(temp);
+ 		// curExplain.isCovered = true;
+ 		// explanation.push(curExplain);
+ 		return;
+ 	}
+
+ 	// curExplain.index = index;
+ 	// curExplain.add = currentComb.slice(0);
+ 	// explanation.push(curExplain);
+
+
+ 	
+ 	currentComb.push(availableRects[index]);
+
+	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
+
+	currentComb.pop();
+
+	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
+ 	
+}
+
+
+
+//Step 3 - List out all the Rects that is available to choose to cover the remaining cells (not include the Step2Rects)
 function ListAvailableRects(LeftoverCells){
 	var availableRects = new Array();
 	var step2_tempRects = new Array();    //Make a Rects array out from Step2Rects's structure
@@ -735,51 +736,7 @@ function ListAvailableRects(LeftoverCells){
 	}
 	return availableRects;
 }
-
-//Step 3 - Backtracking 
-function findCombination(start, remainCells, availableRects, currentComb, resultsCombs){
- 	if(remainCells.length > 0 && (start == availableRects.length - 1)){
- 		return;
- 	}
- 	else if (remainCells.length == 0){
- 		resultsCombs.push(currentComb);
- 		return;
- 	}
- 	else {
- 		for (var i = start; i < availableRects.length; i++){
-			if(!IsRectDuplicateIn(availableRects[i],currentComb))
-				currentComb.push(availableRects[i]);
- 			findCombination(i+1, removeCoveredCells(remainCells,availableRects[i]), availableRects, currentComb, resultsCombs);
- 			currentComb = currentComb.slice(0,-1);
- 		}
- 	}
-}
-
  
-// Remove all the cells that are covered by the given Rect
-function removeCoveredCells(remainCells, givenRect){
-	var updatedCells = remainCells.slice(0);
-	if (updatedCells.length == 0){
-		return updatedCells;
-	}
-	for (var i = 0; i < updatedCells.length; i++){
-		if (IsRectDuplicateIn(givenRect,updatedCells[i].Rects)){
-			// Remove the cell that has been covered by the given rect (Remove 1 element at the index i)
-			updatedCells.splice(i,1);
-		}
-	}
-	return updatedCells;
-
-	// for (var i = 0; i < remainCells.length; i++){
-	// 	if (IsRectDuplicateIn(givenRect,remainCells[i].Rects)){
-	// 		// Remove the cell that has been covered by the given rect (Remove 1 element at the index i)
-	// 		remainCells.splice(i,1);
-	// 	}
-	// }
-	// console.log('remainCells',remainCells);
-}
-
-
 //Step 3 - Is the chosen Rect duplicate (already) in the Rects array 
 function IsRectDuplicateIn(Rect, RectsArr){
 	for (var i = 0; i < RectsArr.length; i++){
@@ -819,32 +776,25 @@ function BinaryString( value, bits )
 	return str;
 }
 
-
-//Reset the KMap Covered attribute
-function resetKMapCovered(){
-	for (let i = 0; i < KMap.Width; i++){
-		for (let j = 0; j <KMap.Width; j++){
-			KMap[i][j].Covered = false;
-		}
-	}
-}
-
-
 //Check to see if KMap is covered by the given Comb + along with the Step2Rects 
 function isKMapCovereByCurrentCombination(curComb){
 	//Reset the .Covered flag
-	resetKMapCovered();
-
+	Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
 	for (let i = 0; i < Step2Rects.length; i++){
 		Cover(Step2Rects[i].Rect,true);
 	}
 
 	for (let i = 0; i < curComb.length; i++){
-		Cover(curComb[i],true);
+		if (!IsCovered(curComb[i])){
+			Cover(curComb[i],true);
+		}
+		else {
+			return false;
+		}
 	}
 
 	for (let i = 0; i < KMap.Width; i++){
-		for (let j = 0; j <KMap.Width; j++){
+		for (let j = 0; j <KMap.Height; j++){
 			if(KMap[i][j].Value == 1 && KMap[i][j].Covered == false){
 				return false;
 			}
@@ -853,9 +803,39 @@ function isKMapCovereByCurrentCombination(curComb){
 	return true;
 } 
 
+//Count how many cells is leftovered by the given Comb + along with the Step2Rects 
+function leftOveredCellsByComb(curComb){
+	var numberofLeftOver = 0;
+	//Reset the .Covered flag
+	Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
+	for (let i = 0; i < Step2Rects.length; i++){
+		Cover(Step2Rects[i].Rect,true);
+	}
+
+	for (let i = 0; i < curComb.length; i++){
+		if (!IsCovered(curComb[i])){
+			Cover(curComb[i],true);
+		}
+		else {
+			return false;
+		}
+	}
+
+	for (let i = 0; i < KMap.Width; i++){
+		for (let j = 0; j <KMap.Height; j++){
+			if(KMap[i][j].Value == 1 && KMap[i][j].Covered == false){
+				numberofLeftOver++;
+			}
+		}
+	}
+	return numberofLeftOver;
+} 
+
+
 // Find and append sole Rects 1x1 that don't belong to any LargeRects
 function addSoleRects1x1(curComb){
-	resetKMapCovered();
+	Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
+
 	for (let i = 0; i < Step2Rects.length; i++){
 		Cover(Step2Rects[i].Rect,true);
 	}
@@ -865,10 +845,10 @@ function addSoleRects1x1(curComb){
 	}
 
 	for (let i = 0; i < KMap.Width; i++){
-		for (let j = 0; j <KMap.Width; j++){
+		for (let j = 0; j <KMap.Height; j++){
 			if(KMap[i][j].Value == 1 && KMap[i][j].Covered == false){
 				curComb.push(CreateRect(i,j,1,1));
-				Cover(CreateRect(i,j,1,1), true);
+				Cover(CreateRect(i,j,1,1), true); 
 			}
 		}
 	}
@@ -883,6 +863,100 @@ function combWeight(curComb){
 	return totalweight;
 }
 
+function sortRectsByWeight(Rects) {
+    var Weights = new Array();
+    //reset KMap Covered value
+    Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
+
+    for (w = 0; w < KMap.Width; w++) {
+        Weights[w] = new Array();
+        for (h = 0; h < KMap.Height; h++) {
+        	// initial weight is 0 if not already covered, high if already covered
+            Weights[w][h] = (KMap[w][h].Covered) ? Heavy : 0;
+        }
+    }
+
+    // seed the weight map with 1 for every square covered by every Rect (all the large rects)
+    var i = 0;
+    for (i = 0; i < Rects.length; i++) {
+        AddRectWeight(Weights, Rects[i], 1);
+    }
+
+    // // generate a set of rects sorted by weight - but  after selecting each minimal
+    // // weighted rect, re-weight the map for the next selection.  Re-weight by
+    // // making the squares of the selected Rect very heavy, but reduce the
+    // // weight of any squares for Rects that overlap the selected Rect.  This has the
+    // // effect of pushing the rects that duplicate KMap coverage to the back of the list, 
+    // // while bubbling non-overlapping maximal covering rects to the front.
+    var SortedRects = new Array();
+    while (Rects.length > 0) {
+        var j = 0;
+        for (j = 0; j < Rects.length; j++) { // get the weight for the remaining Rects
+            Rects[j].Weight = GetRectWeight(Weights, Rects[j]);
+        }
+        // Sort the array to find a Rect with minimal weight
+        Rects.sort(SortByWeight);
+        SortedRects.push(Rects[0]);
+        if (Rects.length == 1) { // just found the last Rect, break out
+            break;
+        }
+        // Make the weight map very heavy for the selected Rect's squares
+        AddRectWeight(Weights, Rects[0], Heavy);
+        // Reduce the weight for Rects that overlap the selected Rect
+        for (j = 0; j < Rects.length; j++) {
+            if (OverlappingRects(Rects[0], Rects[j])) {
+                AddRectWeight(Weights, Rects[j], -1);
+            }
+        }
+        // continue processing with all the Rects but the first one
+        Rects = Rects.slice(1);
+    }
+
+    // Iterate from the SortedRects downwardly, add to rects until it fully covered the KMap 
+    var SelectedRects = new Array();
+    TryRects(SortedRects, SelectedRects);
+    return SelectedRects;
+}
+
+
+function getMinimalIndex(Step4Equations){
+	if(Step4Equations.length > 2){
+		var minimalCombIndexes = new Array();
+		var minElement = Step4Equations[0].length;
+		//find Equation that has the least term
+		for (var i = 1; i < Step4Equations.length; i++){
+			if(Step4Equations[i].length < minElement){
+				minElement = Step4Equations[i].length;
+			}
+		}
+
+		var subArray = new Array();
+		for (var i = 0; i < Step4Equations.length; i++){
+			if(Step4Equations[i].length == minElement){
+				subArray.push({Rect: Step4Equations[i],Index: i});
+			}
+		}
+		var maxWeight = combWeight(subArray[0].Rect);
+		for (var i = 0; i < subArray.length; i++){
+			if(combWeight(subArray[i].Rect) > maxWeight){
+				maxWeight = combWeight(subArray[i].Rect);
+			}
+		}
+
+		for (var i = 0; i < subArray.length; i++){
+			if(combWeight(subArray[i].Rect) == maxWeight){
+				minimalCombIndexes.push(subArray[i].Index);
+			}
+		}
+		return minimalCombIndexes[0];
+	}
+	else if (Step4Equations.length == 2){
+		return (combWeight(Step4Equations[0]) <= combWeight(Step4Equations[1]))?0:1
+	}
+	else {
+		return 0;
+	}
+}
 
 // redraws UI (with no highlights)
 function UpdateUI()
@@ -903,6 +977,7 @@ function UpdateUI()
         SetBackgroundColor(TruthTable[i].KMapEntry.TDUIName, HighlightColor(Val));
     }
     SetInnerHTML("EquationDiv", GenerateEquationHTML());
+    $("#StepByStep").hide();
     SetInnerHTML("Step_1",GenerateStep1HTML());
     SetInnerHTML("Step_2",GenerateStep2HTML());
     SetInnerHTML("Step_3",GenerateStep3HTML());
@@ -970,8 +1045,7 @@ function SetShowRect( EquationEntry, EquationIndex )
             for (dy = 0; dy < ShowRect.h; dy++)
             {
                 var KMEntry = KMap[(ShowRect.x + dx) % KMap.Width][(ShowRect.y + dy) % KMap.Height];
-                // console.log('KMEntry',KMEntry);
-                var Val = DisplayValue(TruthTable[i].KMapEntry.Value);
+                var Val = DisplayValue(KMEntry.Value);
                 //KMap
                 SetBackgroundColor(KMEntry.ButtonUIName, RectHighlightColor(Val));
                 SetBackgroundColor(KMEntry.TDUIName, RectHighlightColor(Val));
@@ -1114,7 +1188,7 @@ function GenerateKMapHTML()
 	return Text;
 }
 
-function GenerateKMapHTMLfrom(Rects) 
+function GenerateKMapHTMLfrom(Rects, specialRect, color) 
 {
 	var Text = "<table>"
 	
@@ -1136,15 +1210,26 @@ function GenerateKMapHTMLfrom(Rects)
 					flag = false;
 				}
 				else{
-					flag = true;
+					//If inside special rect => color it
+					if (specialRect != null){
+						if(isCoveredByRectIndex(w,h,specialRect) == true)
+							flag = 'custom';
+						else
+							flag = true;
+					}
+					else 
+						flag = true;
 					break;
 				}
 			}
 			if (flag == false){
 				Text += "<td style='background-color: rgb(0, 195, 151); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
 			}
-			else {
+			else if(flag == true){
 				Text += "<td style='background-color: rgb(200, 90, 60); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
+			}
+			else {
+				Text += "<td style='background-color: "+ color +"; text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
 			}
 		}
 		Text += "</tr>";
@@ -1181,7 +1266,7 @@ function GenerateStep1HTML(){
 		// Special case: have to make a tempArr which have only 1 rect inside (which is LargeRects[i])
 		var DemoRects = new Array();
 		DemoRects.push({Rect:LargeRects[i],Pos:"temp"});
-		Text += "<div class=\"Step1KMaps\">" + GenerateKMapHTMLfrom(DemoRects);
+		Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,null);
 		Text += "<span class=\"caption\">";
 		if(LargeRects[i]!=null){
 			Text += RectToEquation(LargeRects[i])+"</span></div>";
@@ -1196,37 +1281,54 @@ function GenerateStep1HTML(){
 
 
 function GenerateStep2HTML(){
-	var Text =  "<p><b>Bước 2:</b> Ta có ";
-	for (var i = 0; i < Step2Rects.length; i++){
-		if (i <= Step2Rects.length-3){
-			Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")" + "</b> nằm trong tế bào lớn duy nhất là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>, " ;
-		}
-		else if (i == Step2Rects.length-2){
-			Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm trong tế bào lớn duy nhất <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b> và ";
-		}
-		else {
-			Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm trong tế bào lớn duy nhất là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>.<br>";
-		}
-	}
-	Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
-	Text += "<div class=\"Step1KMaps\">" + GenerateKMapHTMLfrom(Step2Rects) +"</div>";
-	if(flagStep3 == false){
-		Text += "<p>&rArr; Ta nhận thấy biểu đồ Karnaugh đã được phủ kín </p>";
+	if (Step2Rects.length == 0){
+		var Text =  "<p><b>Bước 2:</b> Không tìm thấy bất kỳ ô nào chỉ nằm trong 1 tế bào lớn duy nhất<br>";
+		Text += "<p>&rArr; Ta tiếp tục qua bước 3";
 	}
 	else {
-		if (LeftoverCells.length == 1){
-			Text += "<p>&rArr; Còn lại ô "+ "<b>("+ LeftoverCells[0].Pos.x +","+ LeftoverCells[0].Pos.y+ ")</b>" + " chưa được phủ nên ta qua Bước 3 </p>";
+		var Text =  "<p><b>Bước 2:</b> Ta có ";
+		for (var i = 0; i < Step2Rects.length; i++){
+			if (i <= Step2Rects.length-3){
+				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")" + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>, " ;
+			}
+			else if (i == Step2Rects.length-2){
+				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b> và ";
+			}
+			else {
+				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>.<br>";
+			}
+		}
+		Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
+		Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
+		Text += "<span class=\"caption\">";
+		if(Step2Rects.length > 0){
+			for (var k = 0; k < Step2Rects.length; k++){
+				if (k < Step2Rects.length-1)
+					Text += RectToEquation(Step2Rects[k].Rect)+ "+";
+				else
+					Text += RectToEquation(Step2Rects[k].Rect)+"</span></div>";
+			}
+		}
+		if(flagStep3 == false){
+			Text += "<p>&rArr; Ta nhận thấy biểu đồ Karnaugh đã được phủ kín </p>";
 		}
 		else {
-			Text += "<p>&rArr; Còn lại các ô: ";
-			for (var i = 0; i < LeftoverCells.length; i++){
-				if( i < LeftoverCells.length-1)
-					Text += "<b>("+ LeftoverCells[0].Pos.x +","+ LeftoverCells[0].Pos.y+ ")</b>, ";
-				else 
-					Text += "và <b>("+ LeftoverCells[0].Pos.x +","+ LeftoverCells[0].Pos.y+ ")</b>";
+			if (LeftoverCells.length == 1){
+				Text += "<p>&rArr; Còn lại ô "+ "<b>("+ LeftoverCells[0].Pos.x +","+ LeftoverCells[0].Pos.y+ ")</b>" + " chưa được phủ nên ta qua Bước 3 </p>";
 			}
-			Text += " chưa được phủ nên ta qua Bước 3 </p>";
-		}	
+			else {
+				Text += "<p>&rArr; Còn lại các ô: ";
+				for (var i = 0; i < LeftoverCells.length; i++){
+					if( i < LeftoverCells.length-2)
+						Text += "<b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>, ";
+					else if (i < LeftoverCells.length-1)
+						Text += "<b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b> ";
+					else 
+						Text += "và <b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>";
+				}
+				Text += " chưa được phủ nên ta tiếp tục qua Bước 3 </p>";
+			}	
+		}
 	}
 	return Text;
 }
@@ -1245,14 +1347,37 @@ function GenerateStep3HTML(){
 				else
 					Text += "<b>"+ RectToEquation(LeftoverCells[0].Rects[i]) + "</b>";
 			}
-			Text += " nên ta chọn tùy ý một trong các tế bào trên ta đều phủ kín biểu đồ Karnaugh của <i>f</i> </p>";
+			Text += " nên ta chọn tùy ý một trong các tế bào trên ta đều phủ kín biểu đồ Karnaugh của <i>f</i>:";
+			Text += "<ul>";
+			for (var i = 0; i < LeftoverCells[0].Rects.length; i++){
+				Text += "<li><p>Nếu chọn: "+ "<b>"+ RectToEquation(LeftoverCells[0].Rects[i]) + "</b>:</p>";
+
+				var DemoRects = new Array();
+				DemoRects = Step2Rects.slice();
+				for (var k = 0; k < LeftoverCells[0].Rects.length; k++){
+					DemoRects.push({Rect:LeftoverCells[0].Rects[k],Pos:"temp"});
+				}
+
+
+				Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,LeftoverCells[0].Rects[i],'rgb(255, 255, 102)');
+				Text += "<span class=\"caption\">";
+				Text += "+ <b>"+ RectToEquation(LeftoverCells[0].Rects[i])+"</b></span></div>";
+				Text += "</li>";
+			}
+			Text += "</p>";
 		}
+		else{
+			Text += "Ta có sơ đồ cách chọn các tế bào lớn còn lại để phủ kín biểu đồ Karnaugh <i>f</i> theo các nhánh của hình cây:<br></p>";
+		}
+	}
+	else{
+		$("#Step_3").hide();
 	}
 	return Text;
 }
 
 function GenerateStep4HTML(){
-	var Text =  "<p><b>Bước 4: </b>Ta được phép phủ tối thiểu tương ứng với các công thức đa thức:<br>";
+	var Text =  "<p><b>Bước 4: </b>Ta được tất cả các phép phủ tương ứng với các công thức đa thức dưới đây:<br>";
 	for (var i = 0; i < Step4Equations.length; i++){
 		Text+= "&nbsp;&nbsp;&nbsp;&nbsp;"+ FunctionText + " ("+ (i+1) +") <b>" + " = ";
 		for (var j = 0; j < Step4Equations[i].length; j++){
@@ -1287,7 +1412,8 @@ function GenerateStep4HTML(){
 			Text += "</b>";
 		}
 		else if(combWeight(Step4Equations[0]) != combWeight(Step4Equations[1])){
-			var minimal = (combWeight(Step4Equations[0]) > combWeight(Step4Equations[1]))?0:1 ;
+			var minimal = (combWeight(Step4Equations[0]) < combWeight(Step4Equations[1]))?0:1 ;
+			// console.log('minimal',minimal,combWeight(Step4Equations[0]),combWeight(Step4Equations[1]));
 			Text += "Ta có hai công thức đa thức tương ứng nhưng chỉ có công thức ("+ (minimal+1) +") là tối tiểu<br>";
 			Text += "<p>&rArr; "+ FunctionText + " = <b>";
 
@@ -1299,6 +1425,85 @@ function GenerateStep4HTML(){
 				else
 					Text += RectToEquation(Step4Equations[minimal][j]) + "</b>";
 			}
+		}
+	}
+	else{
+		// If there more than 2 combinations => find the minimal ones and conclude
+		var minimalCombIndexes = new Array();
+		var minElement = Step4Equations[0].length;
+		//find Equation that has the least term
+		for (var i = 1; i < Step4Equations.length; i++){
+			if(Step4Equations[i].length < minElement){
+				minElement = Step4Equations[i].length;
+			}
+		}
+
+		var subArray = new Array();
+		for (var i = 0; i < Step4Equations.length; i++){
+			if(Step4Equations[i].length == minElement){
+				subArray.push({Rect: Step4Equations[i],Index: i});
+			}
+		}
+		var maxWeight = combWeight(subArray[0].Rect);
+		for (var i = 0; i < subArray.length; i++){
+			if(combWeight(subArray[i].Rect) > maxWeight){
+				maxWeight = combWeight(subArray[i].Rect);
+			}
+		}
+
+		for (var i = 0; i < subArray.length; i++){
+			if(combWeight(subArray[i].Rect) == maxWeight){
+				minimalCombIndexes.push(subArray[i].Index);
+			}
+		}
+		// If all of them is equal 
+		if (minimalCombIndexes.length == Step4Equations.length){
+			Text += "Nhận thấy tất cả công thức này đều đơn giản như nhau nên ta được tập hợp các công thức đa thức tối tiểu:<br>";
+			Text += "<p>&rArr; "+ FunctionText + " = <b>";
+			for (var i = 0; i < Step4Equations.length; i++){
+				for (var j = 0; j < Step4Equations[i].length; j++){
+					if(j < Step4Equations[i].length-1){
+						Text += RectToEquation(Step4Equations[i][j]);
+						Text += " + ";
+					}
+					else
+						Text += RectToEquation(Step4Equations[i][j]) + "</b>";
+				}
+			if (i < Step4Equations.length-1)
+				Text += "</b> hoặc <b>";
+			}
+			Text += "</b>";
+		}
+		else {
+			Text += "Trong đó, "; 
+			if (minimalCombIndexes.length == 1){
+				Text += "công thức ("+ (minimalCombIndexes[0]+1)+") ";
+			}
+			else{
+				for (var i = 0; i < minimalCombIndexes.length; i++){
+					if (i < minimalCombIndexes.length-1)
+						Text += "công thức ("+ (minimalCombIndexes[i]+1)+"), ";
+					else
+						Text += "và công thức ("+ (minimalCombIndexes[i]+1)+") ";
+				}
+			}
+			Text += "đơn giản hơn các công thức khác nên ta kết luận tập hợp các công thức đa thức tối tiểu:<br>";
+			
+			Text += "<p>&rArr; "+ FunctionText + " = <b>";
+			for (var i = 0; i < minimalCombIndexes.length; i++){
+				var minimal = minimalCombIndexes[i];
+				for (var j = 0; j < Step4Equations[minimal].length; j++){
+					if(j < Step4Equations[minimal].length-1){
+						Text += RectToEquation(Step4Equations[minimal][j]);
+						Text += " + ";
+					}
+					else
+						Text += RectToEquation(Step4Equations[minimal][j]) + "</b>";
+				}
+			if (i < minimalCombIndexes.length-1)
+				Text += "</b> hoặc <b>";
+			}
+			Text += "</b>";
 		}
 	}
 	return Text;
@@ -1315,10 +1520,6 @@ function ChangeVariableNumber( Num )
 	GetElement("ThreeVariableRB").checked = (Num==3)?true:false;
 	GetElement("FourVariableRB").checked  = (Num==4)?true:false;
 	Search();
-	SetInnerHTML("Step_1",GenerateStep1HTML());
-	SetInnerHTML("Step_2",GenerateStep2HTML());
-	SetInnerHTML("Step_3",GenerateStep3HTML());
-	SetInnerHTML("Step_4",GenerateStep4HTML());
 	UpdateUI();
 }
 

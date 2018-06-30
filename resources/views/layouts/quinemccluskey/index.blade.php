@@ -43,21 +43,6 @@
                     </div>
 
                 </div>
-
-                <!-- <div class="row">
-                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-
-                        <ul class="list-group">
-                            <li class="list-unstyled">File should contain two lines each are a set of comma seperated integers</li>
-                            <li class="list-unstyled">first line should contain minterms and the second should contain dont cares</li>
-                        </ul>
-                    </div>
-
-                    <div id="downloadButton">
-
-                    </div>
-                </div>
- -->
             </form>
 
         </div>

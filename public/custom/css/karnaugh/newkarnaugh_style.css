@@ -202,7 +202,7 @@ input::placeholder { /* Chrome/Opera/Safari */
 }
 
 
-div .Step1KMaps{
+div .SmallKMaps{
     /* To correctly align image, regardless of content height: */
     vertical-align: top !important;
     display: inline-block !important;
@@ -222,4 +222,8 @@ div .Step1KMaps{
     color: #13a7f3;
     padding: 5px 10px !important;
     margin-bottom: 0 !important
+}
+
+#StepByStep .caption{
+    color: #13a7f3;
 }

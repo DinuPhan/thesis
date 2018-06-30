@@ -15,12 +15,12 @@
 	    		<br>
 	    		<p class="header-color half-bottom">
 					<small>
-						Nhập <b> TÊN </b> các biến cách nhau bởi 1 khoảng trắng - space (Vd: <b>A B C D</b>)
+						Nhập <b> TÊN </b> các biến cách nhau bởi <b>1 khoảng trắng</b> rồi nhấn <b>Enter</b> (Vd: <b>A B C D</b>)
 						<br>
 						<em> Nếu không thay đổi thì chương trình nhận các biến mặc định là </em><b>X Y Z T</b>
 					</small>
 				</p>
-				<input type="text" class="remove-bottom full-width pull-center" id="equation" placeholder="Nhập các đa thức" style="font-style: italic;">
+				<input type="text" class="remove-bottom full-width pull-center" id="equation" placeholder="Nhập đa thức dưới dạng nối rời chính tắc" style="font-style: italic;">
 				<p class="header-color half-bottom">
 					<small>
 						Lưu ý: Có thể dùng dấu <b>!</b> để biểu diễn <b>NOT</b> và dấu <b>+</b> cho <b>OR</b> (Vd: <b>XYZT + !XY!Z + X!YT</b>)

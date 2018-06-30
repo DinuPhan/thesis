@@ -36,7 +36,7 @@ document.getElementById('equation').addEventListener('change', function() {
 	// check if input is valid
 	if (isNaN(this.value) ){
 		var strlower = this.value.toLowerCase();
-		// console.log(strlower);
+		console.log(strlower);
 		
 		var varNum = (CountVar(this.value));
 
@@ -80,5 +80,4 @@ document.getElementById('equation').addEventListener('change', function() {
 	}else{
 		alert("Invalid input");
 	}
-
 });
