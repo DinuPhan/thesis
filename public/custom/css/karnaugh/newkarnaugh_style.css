@@ -115,7 +115,7 @@ table caption {
 
 table td,
 table th {
-    border-left: 1px solid #1f2737;
+    border-left: 1px solid #1D3253;
     border-width: 0 0 0 3px;
     font-size: inherit;
     margin: 0;
@@ -223,7 +223,21 @@ div .SmallKMaps{
     padding: 5px 10px !important;
     margin-bottom: 0 !important
 }
+#StepByStep ol:{
+    padding-left: 0px;
+}
 
+#StepByStep ol > ol{
+    padding-left: 6em;
+}
+
+ol.a {
+    list-style-type: circle;
+}
+
+ol.b {
+    list-style-type: square;
+}
 #StepByStep .caption{
     color: #13a7f3;
 }

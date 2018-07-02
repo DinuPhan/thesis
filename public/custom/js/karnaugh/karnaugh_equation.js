@@ -25,7 +25,6 @@ function replaceVar (expression) {
 		if(eval(string) > 0){
 			document.getElementById(TruthTable[i].ButtonUIName).click();
 		}
-
 	};
 
 }
@@ -36,7 +35,6 @@ document.getElementById('equation').addEventListener('change', function() {
 	// check if input is valid
 	if (isNaN(this.value) ){
 		var strlower = this.value.toLowerCase();
-		console.log(strlower);
 		
 		var varNum = (CountVar(this.value));
 
@@ -48,12 +46,13 @@ document.getElementById('equation').addEventListener('change', function() {
 			
 			// put times(*)symbol between variables
 			func[i] = func[i].split(/([a-z])/).join("&").replace("&", "").split("&&").join("&").split("&!&").join("&!");
-
+			console.log('func[i] ',func[i] );
 			// r_trim to remove * from the final of the string
 			func[i] = func[i].substr(0,(func[i].length -1));
 		};
 
 		strlower = func.join(" | ");
+		console.log('tao day ne',strlower);
 		switch(varNum)
 		{
 			case 4:

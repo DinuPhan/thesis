@@ -118,3 +118,8 @@ QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-
 
 
 
+
+QWERT#1-------------------------------------------------------------FLOW-QUiNE.JS
+
++ Truyền input minterm (cú pháp: cách nhau dấu phẩy vd: 1,4,5,6,7,9s) vào để đọc và lọc ra thành mảng minterm (input.js)
+

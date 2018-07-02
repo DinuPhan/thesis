@@ -23,10 +23,11 @@ var Step2Rects = new Array();					// Rects that cover 1-weight cells in step 2
 var flagStep3 = false;							// Flag to see if the rects in step 2 coverted all the Kmap or not
 												// Flag == false => Step 4, Flag == true => Go to Step 3
 var LeftoverCells = new Array();
+var explanation = new Array();
 var Step4Equations = new Array();				// Expressions of S.O.P in Step4
 
-var totalnodes = 0;
-
+var totalnodes = 0;								// total of steps in expalnation
+var countCovered = 0;							// number of found expressions that covered the Kmap
 for (i=0; i<Math.pow(2,MaxVariableCount); i++)
 {
 	SolEquation[i] = new Array();				// for each term in result function
@@ -95,7 +96,7 @@ function InitializeTables(VarCount)
 			}
 		}
 	}
-
+	console.log('TruthTable',TruthTable);
 	FunctionText = "ƒ(";
 	for (i=0; i<VariableCount; i++)
 	{
@@ -110,8 +111,8 @@ InitializeTables(VariableCount);
 //    Value is expected to be "1", "0", or "X"
 function HighlightColor( Value )
 {
-	if (Value=="1") return "rgb(200,90,60)";    //0x00FF00;
-	if (Value=="0") return "rgb(0,195,151)"; //~0xFF0000;
+	if (Value=="1") return "rgb(255, 87, 20)";    //0x00FF00;
+	if (Value=="0") return "rgb(0,200,160)"; //~0xFF0000;
 	return "gray"; //0x7F7F7F;
 }
 
@@ -396,10 +397,12 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    	flagStep3 = true;
 
 	    	LeftoverCells = findLeftoverCells(Weights);
+
 	    	//Every leftover cell will store:
 			// 1) the position (.Pos)
 			// 2) Rects that is covering the leftover cell (more than 2 because leftover cells are not 1-weight cell) (.Rects)
-	    	var PossibleCombs = determinePossibleCombs(LeftoverCells);
+	    	var PossibleCombs = (determinePossibleCombs(LeftoverCells)).slice(0);
+
 	    	// Add the Step2_Rects to Step3 combination
 	    	for (var i = 0; i < PossibleCombs.length; i++){
 	    		// Because unshift append to the left => we append from last to top
@@ -409,8 +412,8 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    	}
 	    	var Step3_Combinations = new Array();
 	    	for (var i = 0; i < PossibleCombs.length; i++){
-	    		Step3_Combinations.push(sortRectsByWeight(PossibleCombs[i]));
-	    		// Step3_Combinations.push(PossibleCombs[i]);
+	    		// Step3_Combinations.push(sortRectsByWeight(PossibleCombs[i]));
+	    		Step3_Combinations.push(PossibleCombs[i]);
 	    	}
 	    	return Step3_Combinations;
 	    }
@@ -435,7 +438,7 @@ function Search()
     var Rects = new Array();
     Cover(CreateRect(0, 0, KMap.Width, KMap.Height), false);
 
-    // Find the (larger) rectangles that cover just the quares in the KMap
+    // Find the (larger) rectangles that cover just the squares in the KMap
     //  and search for smaller and smaller rects
     SearchRect(4, 4, true, Rects, true);
     SearchRect(4, 2, true, Rects, true);
@@ -487,7 +490,6 @@ function Search()
     }
 
 	ClearEquation();
-
 	if (BestCoverage.length != 0){
 		var minimal = getMinimalIndex(Step4Equations);
 		var minimumSOP = BestCoverage[minimal].slice(0);
@@ -669,23 +671,21 @@ function determinePossibleCombs(LeftoverCells){
 	var resultsCombs = new Array();						// Store all the accepted combinations (results)
 	var currentComb = new Array();
 	var startIndex = 0;
-	var explanation = new Array();
+	explanation = new Array();
 	totalnodes = 0;
+	countCovered = 0; 								//count number of minimal expressions
+
 	findCombination(startIndex, remainCells, availableRects, currentComb, resultsCombs, explanation);
 
-	console.log('totalnodes',totalnodes);
 	console.log('explanation',explanation);
-	console.log('-------------');
-	console.log('resultsCombs',resultsCombs);
+	// console.log('resultsCombs',resultsCombs);
 	return resultsCombs;
 }
 
 //Step 3 - Backtracking 
 function findCombination(index, remainCells, availableRects, currentComb, resultsCombs, explanation){
  	totalnodes++;
-
-	var curExplain = new Array(); // Initialize an explain
-
+ 	var curExplain = new Array(); //initialize a explanation for every run
  	if (index > availableRects.length){
  		return;
  	}
@@ -693,23 +693,29 @@ function findCombination(index, remainCells, availableRects, currentComb, result
  	if (isKMapCovereByCurrentCombination(currentComb)){
  		var temp = currentComb.slice(0);
  		resultsCombs.push(temp);
- 		// curExplain.isCovered = true;
- 		// explanation.push(curExplain);
+
+ 		//Mark the covered
+ 		countCovered++; 
+ 		curExplain.countCovered = countCovered;
+ 		curExplain.isCovered = true;
+ 		explanation.push(curExplain);
  		return;
  	}
 
- 	// curExplain.index = index;
- 	// curExplain.add = currentComb.slice(0);
- 	// explanation.push(curExplain);
-
-
- 	
+ 	// Add a rect to the current combination
  	currentComb.push(availableRects[index]);
 
+ 	// Record the run for later traceback
+ 	curExplain.indent = index;
+	curExplain.add = availableRects[index];
+	curExplain.curComb = currentComb.slice(0);
+ 	explanation.push(curExplain);
+
+ 	//Continue to expand depthly
 	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
 
 	currentComb.pop();
-
+	//Pop up and expand widely
 	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
  	
 }
@@ -731,6 +737,20 @@ function ListAvailableRects(LeftoverCells){
 		}
 	}
 	return availableRects;
+}
+
+function remainCellsAfterComb(remainCells, givenComb){
+	var tempArr = new Array();
+	var countCells = remainCells.length;
+	tempArr = remainCells.slice(0);
+	for (var i = 0; i < tempArr.length; i++ ){
+		for (var j = 0; j < tempArr[i].Rects.length; j++){
+			if(IsRectDuplicateIn(tempArr[i].Rects[j],givenComb)){
+				countCells--;
+			}
+		}
+	}
+	return countCells;
 }
  
 //Step 3 - Is the chosen Rect duplicate (already) in the Rects array 
@@ -954,13 +974,12 @@ function getMinimalIndex(Step4Equations){
 	}
 }
 
-// redraws UI (with no highlights)
-
+//Find the uniquecells (cells that don't stand inside any large rect)
 function findUniqueCells(){
 	var uniquecells = new Array();
 	for (var i = 0; i < KMap.Width; i++){
 		for (var j = 0; j < KMap.Height; j++){
-			if(KMap[i][j].Value == 1 && rectsCoveringCellAt(i,j) == 0){
+			if(KMap[i][j].Value == 1 && rectsCoveringCellAt(i,j).length == 0){
 				uniquecells.push({Rect:CreateRect(i,j,1,1),Pos: {x: j+1, y: i+1}});
 			}
 		}
@@ -968,6 +987,17 @@ function findUniqueCells(){
 	return uniquecells;
 }
 
+//trim the weight attribute of rects
+function trimWeight(Rects){
+	var newRects = 	Rects.map(obj => ({x: obj.x, y: obj.y, w: obj.w, h: obj.h}));
+	return newRects;
+}
+
+function createRectFromGivenArray(curArr){
+	return CreateRect(curArr.x,curArr.y,curArr.w,curArr.h);
+}
+
+// redraws UI (with no highlights)
 function UpdateUI()
 {
     var i = 0;
@@ -1102,7 +1132,7 @@ function GenerateTruthTableHTML()
 {
 	var Text = "<table ID=\"TruthTableID\" style=\"text-align:center\">";
 	{
-		Text = Text + "<thead style=\"background: rgb(49,60,78);text-align:center\"><tr>";
+		Text = Text + "<thead style=\"background: rgb(47,72,88);text-align:center\"><tr>";
 		var i=0;
 		for (i=0; i<VariableCount; i++)
 		{
@@ -1144,7 +1174,7 @@ function GenerateKMapHTML()
 {
 	var Text = "<table><thead><tr>";
 	var h,w;
-	Text = Text + "<th colspan=\"2\" ></th><th style=\"background: rgb(49,60,78);border-bottom:2px solid rgb(31, 39, 55)\" colspan="+(KMap.Width)+">";
+	Text = Text + "<th colspan=\"2\" ></th><th style=\"background: rgb(47,72,88);border-bottom:2px solid rgb(31, 39, 55)\" colspan="+(KMap.Width)+">";
 
 	for (i=0; i<KMap.XVariables; i++)
 	{
@@ -1158,8 +1188,8 @@ function GenerateKMapHTML()
 	for (i=0; i<KMap.Width; i++)
 	{
 		if (VariableCount == 2)
-			Text += "<th class=\"header-color\" style=\"background: rgb(49,60,78)\">"+BinaryString(BitOrder[i+2],KMap.XVariables)+"</th>";
-		else Text += "<th class=\"header-color\" style=\"background: rgb(49,60,78)\">"+BinaryString(BitOrder[i],KMap.XVariables)+"</th>";
+			Text += "<th class=\"header-color\" style=\"background: rgb(47,72,88)\">"+BinaryString(BitOrder[i+2],KMap.XVariables)+"</th>";
+		else Text += "<th class=\"header-color\" style=\"background: rgb(47,72,88)\">"+BinaryString(BitOrder[i],KMap.XVariables)+"</th>";
 	}
 	Text+="</tr>";
 	
@@ -1174,15 +1204,15 @@ function GenerateKMapHTML()
 		Text = Text + "<tr style=\"opacity:" +opacity + "\">";
 		if (h==0)
 		{
-			Text += "<th style=\"background: rgb(49,60,78); width: 15%\" rowspan="+((KMap.Height) + 2)  +">";
+			Text += "<th style=\"background: rgb(47,72,88); width: 15%\" rowspan="+((KMap.Height) + 2)  +">";
 			for (i=0; i<KMap.YVariables; i++)
 			{
 				Text += "<b class=\"header-color\">" + VariableNames[i+KMap.XVariables] + "</b>";
 			}
 		}
 		if (VariableCount == 2 || VariableCount == 3)
-			Text += "<th class=\"header-color\" style=\"border-left: 2px solid rgb(31, 39, 55);background: rgb(49,60,78);width: 15%\" >"+BinaryString(BitOrder[h+2],KMap.YVariables)+"</th>";
-		else Text += "<th class=\"header-color\" style=\"border-left: 2px solid rgb(31, 39, 55);background: rgb(49,60,78);width: 15%\" >"+BinaryString(BitOrder[h],KMap.YVariables)+"</th>";
+			Text += "<th class=\"header-color\" style=\"border-left: 2px solid rgb(31, 39, 55);background: rgb(47,72,88);width: 15%\" >"+BinaryString(BitOrder[h+2],KMap.YVariables)+"</th>";
+		else Text += "<th class=\"header-color\" style=\"border-left: 2px solid rgb(31, 39, 55);background: rgb(47,72,88);width: 15%\" >"+BinaryString(BitOrder[h],KMap.YVariables)+"</th>";
 
 		for (w=0; w<KMap.Width; w++)
 		{
@@ -1232,10 +1262,10 @@ function GenerateKMapHTMLfrom(Rects, specialRect, color)
 				}
 			}
 			if (flag == false){
-				Text += "<td style='background-color: rgb(0, 195, 151); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
+				Text += "<td style='background-color: rgb(0,200,160); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
 			}
 			else if(flag == true){
-				Text += "<td style='background-color: rgb(200, 90, 60); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
+				Text += "<td style='background-color: rgb(255, 87, 20); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
 			}
 			else {
 				Text += "<td style='background-color: "+ color +"; text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
@@ -1307,8 +1337,23 @@ function GenerateStep2HTML(){
 				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>.<br>";
 			}
 		}
-		Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
-		Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
+		if(findUniqueCells().length > 0){
+			var uniquecells = findUniqueCells();
+			var addUniqueCellsRects = Step2Rects.slice(0);
+			for (var i = 0; i < uniquecells.length; i++){
+				addUniqueCellsRects.push(uniquecells[i]);
+			}
+			Text += "Ngoài ra, còn có các ô đơn lẻ (không thuộc 1 tế bào lớn nào) nằm rải rác như ô <b>("+ uniquecells[0].Pos.x+","+uniquecells[0].Pos.y+")</b>.<br>"
+			Text += "Gạch chéo các tế bào lớn cùng với các ô đơn lẻ, ta được biểu đồ Karnaugh của f như sau:</p>";
+			Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(addUniqueCellsRects,null);
+		}
+		else{
+			Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
+			Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
+		}
+
+		// Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
+		// Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
 		Text += "<span class=\"caption\">";
 		if(Step2Rects.length > 0){
 			for (var k = 0; k < Step2Rects.length; k++){
@@ -1367,7 +1412,6 @@ function GenerateStep3HTML(){
 					DemoRects.push({Rect:LeftoverCells[0].Rects[k],Pos:"temp"});
 				}
 
-
 				Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,LeftoverCells[0].Rects[i],'rgb(255, 255, 102)');
 				Text += "<span class=\"caption\">";
 				Text += "+ <b>"+ RectToEquation(LeftoverCells[0].Rects[i])+"</b></span></div>";
@@ -1375,8 +1419,81 @@ function GenerateStep3HTML(){
 			}
 			Text += "</p>";
 		}
-		else{
-			Text += "Ta có sơ đồ cách chọn các tế bào lớn còn lại để phủ kín biểu đồ Karnaugh <i>f</i> theo các nhánh của hình cây:<br></p>";
+	else{
+		if(totalnodes <= 50){
+			console.log('explanation',explanation,explanation[0].length);
+			Text += "Ta có sơ đồ cách chọn các tế bào lớn còn lại để phủ kín biểu đồ Karnaugh <i>f </i>   theo các nhánh của hình cây:<br><div>";
+			var maxIndent = LargeRects.length - Step2Rects.length-1;
+			for(var step = 0; step < explanation.length-1; step++){
+					// If this is not a conclusion
+					if (typeof explanation[step].indent !== "undefined"){
+						if (explanation[step].indent == 0){
+							explanation[step].indent = 1;
+						}
+						if (explanation[step].indent <=  maxIndent) {
+							Text += "<ol>";
+						    Text += "<p> Ta chọn <i>" + RectToEquation(explanation[step].add) + "</i>:"
+						    if (leftOveredCellsByComb(explanation[step].curComb) == 0)
+						    	Text += "tất cả các ô đã được phủ</p>";
+						    else
+						    	Text += " còn lại "+ leftOveredCellsByComb(explanation[step].curComb) +" ô chưa phủ </p>";
+						    //Show the current KMap stepbystep
+						    var DemoRects = new Array();
+						    DemoRects = Step2Rects.slice(0);
+						    for (var i = 0; i < explanation[step].curComb.length; i++){
+						    	DemoRects.push({Rect:createRectFromGivenArray(explanation[step].curComb[i]),Pos:"temp"});
+						    }
+						    Text +=  "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,createRectFromGivenArray( explanation[step].add),'rgb(255, 255, 102)') + "</div>";
+						}
+						else {
+							Text += "</ol>";
+							continue;
+						}
+						//Look forward to see if the next step is a conclusion => if so, print the Karnaugh and 1 step back
+						//else: check to see if the indent continue to increase, if decrease => fall back
+						if (typeof explanation[step+1].indent === "undefined"){
+							//Conclude the current Combination
+							Text += "<p>&rArr; <i>f</i> = <b>";
+							//Add the compulsory Rects
+							console.log('explanation[step]',explanation[step],'Step2Rects',Step2Rects);
+							var currentCombinations = new Array();
+							for (var i = 0; i < explanation[step].curComb.length; i++){
+								currentCombinations.push(createRectFromGivenArray(explanation[step].curComb[i]));
+							}
+							// console.log('currentCombinations',currentCombinations);
+							for (var j = Step2Rects.length-1; j >= 0; j--){
+					    		currentCombinations.unshift(Step2Rects[j].Rect);
+					    	}	
+					    	console.log('currentCombinations',currentCombinations);
+					    	//Output the current combination 
+							for (var i = 0; i< currentCombinations.length; i++){
+								Text += RectToEquation(currentCombinations[i]);
+								if (i < currentCombinations.length-1){
+									Text += " + ";
+								}
+							}
+							Text += "</b> đã phủ kín biểu đồ Karnaugh ("+ explanation[step+1].countCovered+")</ol>";
+						}
+						else {
+							if ( explanation[step].indent > explanation[step+1].indent){
+								var numberoffallback = explanation[step].indent - explanation[step+1].indent;
+								for(var i = 0; i < numberoffallback-1; i++){
+									Text += "</ol>";
+								}
+							}
+						}
+					}
+					// this is a conclusion => move on to the next step
+					else {
+						continue;
+					}
+
+				}
+				Text += "</div>";
+			}// to many step to show
+			else{
+				Text += "Do sơ đồ theo hình nhánh cây của số cách chọn có tới "+ totalnodes + " nút nên không hiển thị toàn bộ.</p>";
+			}
 		}
 	}
 	else{
@@ -1416,7 +1533,7 @@ function GenerateStep4HTML(){
 						Text += RectToEquation(Step4Equations[i][j]) + "</b>";
 				}
 			if (i == Step4Equations.length-2)
-				Text += "</b> hoặc <b>";
+				Text += "</b><br>&nbsp;&nbsp;&nbsp; hoặc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <b>";
 			}
 			Text += "</b>";
 		}
@@ -1479,7 +1596,7 @@ function GenerateStep4HTML(){
 						Text += RectToEquation(Step4Equations[i][j]) + "</b>";
 				}
 			if (i < Step4Equations.length-1)
-				Text += "</b> hoặc <b>";
+				Text += "</b><br>&nbsp;&nbsp;&nbsp; hoặc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <b>";
 			}
 			Text += "</b>";
 		}
@@ -1510,7 +1627,7 @@ function GenerateStep4HTML(){
 						Text += RectToEquation(Step4Equations[minimal][j]) + "</b>";
 				}
 			if (i < minimalCombIndexes.length-1)
-				Text += "</b> hoặc <b>";
+				Text += "</b><br>&nbsp;&nbsp;&nbsp; hoặc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <b>";
 			}
 			Text += "</b>";
 		}

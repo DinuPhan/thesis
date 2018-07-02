@@ -15,7 +15,7 @@
                             <label for="Input"><font size=5>F = Σ<small>m</small></font></label>
                         </div>
                         <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
-                            <input type="text" class="form-control" id="Minterms" placeholder="Enter numbers of minterms like: 2,5,..">
+                            <input type="text" class="form-control" id="Minterms" value="2,3,6,7,8,10,11,12,14,15" placeholder="Enter numbers of minterms like: 2,5,..">
                         </div>
                     </div>
 
