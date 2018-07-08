@@ -7,6 +7,7 @@ var BitOrder = new Array(2,3,1,0);				// bits across and down Kmap
 var BackgroundColor="white";
 var AllowDontCare=false;						// true doesn't guarantee a minimal solution
 var DontCare = "X";
+var IndentSymbol = new Array("&#9818;","&#9819;","&#9820;","&#9821;","&#9822;","&#9823;"); // List of symbols using for indent in Step 3 
 
 // Variables (initialized here)
 var VariableCount=4;							//1..4
@@ -21,9 +22,8 @@ var Heavy = 100;
 var LargeRects = new Array();					// Large rects (size of 4 and 2) found in step 1
 var Step2Rects = new Array();					// Rects that cover 1-weight cells in step 2
 var flagStep3 = false;							// Flag to see if the rects in step 2 coverted all the Kmap or not
-												// Flag == false => Step 4, Flag == true => Go to Step 3
-var LeftoverCells = new Array();
-var explanation = new Array();
+var LeftoverCells = new Array();				// the cells that isCovered = false after using Step2Rects to cover the Kmap
+var explanation = new Array();					// record structure for each iterations in Step3's finding all possible combinations
 var Step4Equations = new Array();				// Expressions of S.O.P in Step4
 
 var totalnodes = 0;								// total of steps in expalnation
@@ -96,7 +96,6 @@ function InitializeTables(VarCount)
 			}
 		}
 	}
-	console.log('TruthTable',TruthTable);
 	FunctionText = "ƒ(";
 	for (i=0; i<VariableCount; i++)
 	{
@@ -112,7 +111,7 @@ InitializeTables(VariableCount);
 function HighlightColor( Value )
 {
 	if (Value=="1") return "rgb(255, 87, 20)";    //0x00FF00;
-	if (Value=="0") return "rgb(0,200,160)"; //~0xFF0000;
+	if (Value=="0") return "rgb(60, 180, 217)"; //~0xFF0000;
 	return "gray"; //0x7F7F7F;
 }
 
@@ -383,7 +382,7 @@ function FindBestCoverage(Rects2x1,AllRects)
     }
     Step2Rects = step2_tempRects.slice(0); //clone from step2_tempRects to global scope Step2Rects
 
-    // If no 1-weight cell to be found => Sort the array by weight and find the Minimal S.O.P
+    // If none 1-weight cell to be found => Sort the array by weight and find the Minimal S.O.P
     if(LargeRects.length > 0 && Step2Rects.length == 0){
     	var Step2_Combination = new Array();
     	Step2_Combination.push(sortRectsByWeight(Rects2x1));
@@ -455,6 +454,10 @@ function Search()
 
     // Collect all the larger rectangles (Step 1 - Explanation)
     LargeRects = Rects.concat(Rects2x1);
+    if(TestRect(CreateRect(3,3,2,2),true) && IsRectDuplicateIn(CreateRect(3,3,2,2),LargeRects) == false){
+    	LargeRects.push(CreateRect(3,3,2,2));
+    }
+    // console.log('LargeRects',LargeRects);
 
     // FindBestCoverage(Rects2x1, Rects);
     var BestCoverage = FindBestCoverage(Rects2x1, Rects);
@@ -671,19 +674,22 @@ function determinePossibleCombs(LeftoverCells){
 	var resultsCombs = new Array();						// Store all the accepted combinations (results)
 	var currentComb = new Array();
 	var startIndex = 0;
+	var group = 0;
 	explanation = new Array();
 	totalnodes = 0;
 	countCovered = 0; 								//count number of minimal expressions
 
-	findCombination(startIndex, remainCells, availableRects, currentComb, resultsCombs, explanation);
+	findCombination(startIndex, remainCells, availableRects, currentComb, resultsCombs, explanation,group);
+
 
 	console.log('explanation',explanation);
+	console.log('-------------------');
 	// console.log('resultsCombs',resultsCombs);
 	return resultsCombs;
 }
 
 //Step 3 - Backtracking 
-function findCombination(index, remainCells, availableRects, currentComb, resultsCombs, explanation){
+function findCombination(index, remainCells, availableRects, currentComb, resultsCombs, explanation, group){
  	totalnodes++;
  	var curExplain = new Array(); //initialize a explanation for every run
  	if (index > availableRects.length){
@@ -696,14 +702,18 @@ function findCombination(index, remainCells, availableRects, currentComb, result
 
  		//Mark the covered
  		countCovered++; 
+ 		curExplain.group = group;
  		curExplain.countCovered = countCovered;
  		curExplain.isCovered = true;
  		explanation.push(curExplain);
  		return;
  	}
 
+ 	curExplain.group = group;
  	// Add a rect to the current combination
  	currentComb.push(availableRects[index]);
+ 	group = group + 1;
+
 
  	// Record the run for later traceback
  	curExplain.indent = index;
@@ -712,11 +722,12 @@ function findCombination(index, remainCells, availableRects, currentComb, result
  	explanation.push(curExplain);
 
  	//Continue to expand depthly
-	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
+	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation, group);
 
 	currentComb.pop();
+	group = group - 1;
 	//Pop up and expand widely
-	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation);
+	findCombination(index + 1, remainCells, availableRects, currentComb, resultsCombs, explanation, group);
  	
 }
 
@@ -831,9 +842,6 @@ function leftOveredCellsByComb(curComb){
 	for (let i = 0; i < curComb.length; i++){
 		if (!IsCovered(curComb[i])){
 			Cover(curComb[i],true);
-		}
-		else {
-			return false;
 		}
 	}
 
@@ -1262,7 +1270,7 @@ function GenerateKMapHTMLfrom(Rects, specialRect, color)
 				}
 			}
 			if (flag == false){
-				Text += "<td style='background-color: rgb(0,200,160); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
+				Text += "<td style='background-color: rgb(60, 180, 217); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
 			}
 			else if(flag == true){
 				Text += "<td style='background-color: rgb(255, 87, 20); text-align:center;'>"+ DisplayValue(KMap[w][h].Value) + "</td>";
@@ -1405,7 +1413,6 @@ function GenerateStep3HTML(){
 			Text += "<ul>";
 			for (var i = 0; i < LeftoverCells[0].Rects.length; i++){
 				Text += "<li><p>Nếu chọn: "+ "<b>"+ RectToEquation(LeftoverCells[0].Rects[i]) + "</b>:</p>";
-
 				var DemoRects = new Array();
 				DemoRects = Step2Rects.slice();
 				for (var k = 0; k < LeftoverCells[0].Rects.length; k++){
@@ -1421,41 +1428,54 @@ function GenerateStep3HTML(){
 		}
 	else{
 		if(totalnodes <= 50){
-			console.log('explanation',explanation,explanation[0].length);
 			Text += "Ta có sơ đồ cách chọn các tế bào lớn còn lại để phủ kín biểu đồ Karnaugh <i>f </i>   theo các nhánh của hình cây:<br><div>";
 			var maxIndent = LargeRects.length - Step2Rects.length-1;
 			for(var step = 0; step < explanation.length-1; step++){
-					// If this is not a conclusion
-					if (typeof explanation[step].indent !== "undefined"){
-						if (explanation[step].indent == 0){
-							explanation[step].indent = 1;
-						}
+					// If we can still add new Rect (so this is not a conclusion)=> print the step
+					if (typeof explanation[step].add !== "undefined"){
 						if (explanation[step].indent <=  maxIndent) {
 							Text += "<ol>";
-						    Text += "<p> Ta chọn <i>" + RectToEquation(explanation[step].add) + "</i>:"
+						    Text += "<p>";
+						    // Find the previous move on the same level of indent (same group) and say "remove it" before new move
+							var temp = step-1;
+							while(temp >= 0){
+								if (explanation[temp].group == explanation[step].group){
+									break;
+								}
+								temp--;
+							}
+
+							// console.log('temp hien tai',temp,'step hien tai',step,'group',explanation[step].group,'explanation[step].add',explanation[step].add);
+							if (temp >= 0 && typeof explanation[temp].add !== "undefined"){
+								Text += IndentSymbol[explanation[step].group] + " Không chọn <b><i>" + RectToEquation(explanation[temp].add) + "</i></b>, ta chọn <b><i>"+ RectToEquation(explanation[step].add) + "</i></b>: ";
+							}
+							else 
+								Text += IndentSymbol[explanation[step].group] + " Ta chọn <b><i>" + RectToEquation(explanation[step].add) + "</i></b>: "
+						    
 						    if (leftOveredCellsByComb(explanation[step].curComb) == 0)
-						    	Text += "tất cả các ô đã được phủ</p>";
+						    	Text += "<br>&#8680; Tất cả các ô đã được phủ kín </p>";
 						    else
-						    	Text += " còn lại "+ leftOveredCellsByComb(explanation[step].curComb) +" ô chưa phủ </p>";
+						    	Text += "<br> Còn lại <b>"+ leftOveredCellsByComb(explanation[step].curComb) +"</b> ô chưa phủ </p>";
 						    //Show the current KMap stepbystep
 						    var DemoRects = new Array();
 						    DemoRects = Step2Rects.slice(0);
 						    for (var i = 0; i < explanation[step].curComb.length; i++){
 						    	DemoRects.push({Rect:createRectFromGivenArray(explanation[step].curComb[i]),Pos:"temp"});
 						    }
-						    Text +=  "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,createRectFromGivenArray( explanation[step].add),'rgb(255, 255, 102)') + "</div>";
+						    Text +=  "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,createRectFromGivenArray( explanation[step].add),'rgb(255, 255, 102)');
+						    Text += "<span class=\"caption\">";
+							Text += "+ <b>"+ RectToEquation(explanation[step].add)+"</b></span></div>";
 						}
 						else {
 							Text += "</ol>";
 							continue;
 						}
-						//Look forward to see if the next step is a conclusion => if so, print the Karnaugh and 1 step back
+						//Look forward to see if the next step is a conclusion => if so, print the Karnaugh and step back
 						//else: check to see if the indent continue to increase, if decrease => fall back
 						if (typeof explanation[step+1].indent === "undefined"){
 							//Conclude the current Combination
-							Text += "<p>&rArr; <i>f</i> = <b>";
+							Text += "<p>Vậy đa thức <i>f</i> = <b>";
 							//Add the compulsory Rects
-							console.log('explanation[step]',explanation[step],'Step2Rects',Step2Rects);
 							var currentCombinations = new Array();
 							for (var i = 0; i < explanation[step].curComb.length; i++){
 								currentCombinations.push(createRectFromGivenArray(explanation[step].curComb[i]));
@@ -1464,7 +1484,6 @@ function GenerateStep3HTML(){
 							for (var j = Step2Rects.length-1; j >= 0; j--){
 					    		currentCombinations.unshift(Step2Rects[j].Rect);
 					    	}	
-					    	console.log('currentCombinations',currentCombinations);
 					    	//Output the current combination 
 							for (var i = 0; i< currentCombinations.length; i++){
 								Text += RectToEquation(currentCombinations[i]);
@@ -1472,7 +1491,7 @@ function GenerateStep3HTML(){
 									Text += " + ";
 								}
 							}
-							Text += "</b> đã phủ kín biểu đồ Karnaugh ("+ explanation[step+1].countCovered+")</ol>";
+							Text += "</b> đã phủ kín biểu đồ Karnaugh <i>f</i> ("+ explanation[step+1].countCovered+")</ol>";
 						}
 						else {
 							if ( explanation[step].indent > explanation[step+1].indent){
@@ -1483,8 +1502,12 @@ function GenerateStep3HTML(){
 							}
 						}
 					}
-					// this is a conclusion => move on to the next step
 					else {
+						// This is a conclusion so that We cannot add any new Rect 
+						// if there's no rect left to add => step back
+						// else, there're rect to add => continue
+						if(typeof explanation[step+1].add === "undefined")
+							Text+= "</ol>";
 						continue;
 					}
 
@@ -1539,7 +1562,6 @@ function GenerateStep4HTML(){
 		}
 		else if(combWeight(Step4Equations[0]) != combWeight(Step4Equations[1])){
 			var minimal = (combWeight(Step4Equations[0]) < combWeight(Step4Equations[1]))?0:1 ;
-			// console.log('minimal',minimal,combWeight(Step4Equations[0]),combWeight(Step4Equations[1]));
 			Text += "Ta có hai công thức đa thức tương ứng nhưng chỉ có công thức ("+ (minimal+1) +") là tối tiểu<br>";
 			Text += "<p>&rArr; "+ FunctionText + " = <b>";
 

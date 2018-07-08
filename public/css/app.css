@@ -2011,11 +2011,6 @@ pre code {
     clear: both
 }
 
-.row {
-    margin-left: -15px;
-    margin-right: -15px
-}
-
 .row:after,
 .row:before {
     content: " ";
@@ -2939,7 +2934,7 @@ table th[class*=col-] {
 .table>thead>tr.success>th,
 .table>thead>tr>td.success,
 .table>thead>tr>th.success {
-    background-color: #dff0d8
+    background-color: #3fb4da
 }
 
 .table-hover>tbody>tr.success:hover>td,

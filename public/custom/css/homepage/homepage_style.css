@@ -5,6 +5,55 @@
     text-align: center;
 }
 
-p {
+.welcome-page > p {
 	padding:5px 0px 5px 0px ;
+}
+
+.fluid.container {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.fluid.container .column,
+.fluid.container .columns {
+    float: left;
+    display: inline;
+}
+
+
+.remove-bottom {
+    margin-bottom: 0 !important
+}
+
+.half-bottom {
+    margin-bottom: 10px !important
+}
+
+.add-bottom {
+    margin-bottom: 20px 
+}
+
+.container .sixteen.columns {
+    width: 100%;
+}
+
+.container .eight.columns {
+    width: 48%;
+    padding-left: 2%;
+}
+
+
+.well {
+    display: block;
+    /*background-color: #313c4e ;*/
+    padding: 10px ;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+.remove-bottom {
+    margin-bottom: 0
 }

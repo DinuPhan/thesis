@@ -5,10 +5,10 @@ var solutionsExpressions;
 
 function printOutput() {
     var jumbotronDiv = document.createElement("div");
-    jumbotronDiv.setAttribute("class", "jumbotron")
+    jumbotronDiv.setAttribute("class", "sixteen columns well header-color add-bottom")
 
     var para = document.createElement("p");
-    var paragraphText = document.createTextNode("You Entered minterms: " + minTerms + " And don't cares: " + dontCares + " and number of inputs = " + numberOfInputs);
+    var paragraphText = document.createTextNode("Bạn đã nhập: " + minTerms + " minterms => tương đương với: " + numberOfInputs + " biến đầu vào");
     para.appendChild(paragraphText);
     jumbotronDiv.append(para);
     if (!specialcase) {
@@ -17,8 +17,8 @@ function printOutput() {
     output = "";
     for (var i = 0; i < solutionsExpressions.length; i++) {
         var solutionParagraph = document.createElement("p");
-        var solutionText = document.createTextNode("Solution " + (i + 1) + ": F = " + solutionsExpressions[i]);
-        output = output.concat("Solution " + (i + 1) + ": F = " + solutionsExpressions[i] + "\n");
+        var solutionText = document.createTextNode("Kết quả " + (i + 1) + ": F = " + solutionsExpressions[i]);
+        output = output.concat("Kết quả " + (i + 1) + ": F = " + solutionsExpressions[i] + "\n");
         solutionParagraph.appendChild(solutionText);
         jumbotronDiv.append(solutionParagraph);
     }
@@ -66,13 +66,13 @@ function clearSteps() {
  */
 function generateGroupListsTables() {
     var divContainer = document.createElement("div");
-    divContainer.setAttribute("class", "container-fluid")
+    divContainer.setAttribute("class", "fluid container add-bottom")
 
     var jumbotronDiv = document.createElement("div");
-    jumbotronDiv.setAttribute("class", "jumbotron");
+    jumbotronDiv.setAttribute("class", "sixteen columns well header-color add-bottom");
 
     var header = document.createElement("h3");
-    var headerText = document.createTextNode("Grouping Process");
+    var headerText = document.createTextNode("Quá trình gom nhóm");
     header.appendChild(headerText);
 
     for (var i = 0; i < groupLists.length; i++) {
@@ -87,7 +87,7 @@ function generateGroupListsTables() {
         primeImplicantsStringArr.push(generateImplicantExpression(primeImplicants[i]));
     }
     var paragraph = document.createElement("p");
-    var paragraphText = document.createTextNode("Prime Implicants Found: " + primeImplicantsStringArr.join(", "))
+    var paragraphText = document.createTextNode("Các Prime Implicants tìm thấy: " + primeImplicantsStringArr.join(", "))
     paragraph.appendChild(paragraphText);
 
     //Add jumbotron containing all group list tables
@@ -119,7 +119,7 @@ function generateGroupListTable(groupList, index) {
     var th = document.createElement("th");
     th.setAttribute("colspan", 2);
     th.setAttribute("class", "success");
-    thText = document.createTextNode("Implicants of size " + Math.pow(2, index));
+    thText = document.createTextNode("Tế bào kích thước " + Math.pow(2, index));
     th.appendChild(thText);
 
     tr1.appendChild(th);
@@ -184,15 +184,15 @@ function generateGroupListTableBody(groupList) {
 
 function generateCoverTables() {
     var coverTablesDiv = document.getElementById("coverTables");
-    var jumbotronDiv = document.createElement("div");
-    jumbotronDiv.setAttribute("class", "jumbotron");
+    var containerDiv = document.createElement("div");
+    containerDiv.setAttribute("class", "fluid container");
     var divContainer = document.createElement("div");
-    divContainer.setAttribute("class", "container");
+    divContainer.setAttribute("class", "sixteen columns well header-color add-bottom");
 
     var h3 = document.createElement("h3");
-    var h3Text = document.createTextNode("Implicants/Minterms tables: ");
+    var h3Text = document.createTextNode("Bảng Implicants/Minterms: ");
     h3.appendChild(h3Text);
-    jumbotronDiv.appendChild(h3);
+    divContainer.appendChild(h3);
 
     var divRow = document.createElement("div");
     divRow.setAttribute("class", "row text-center");
@@ -201,7 +201,7 @@ function generateCoverTables() {
 
     if (uncoveredMinTerms.length > 0) {
         var h4 = document.createElement("h4");
-        var h4Text = document.createTextNode("After Elimination: ");
+        var h4Text = document.createTextNode("Sau khi loại trừ: ");
         h4.appendChild(h4Text);
         divContainer.appendChild(h4);
 
@@ -211,8 +211,8 @@ function generateCoverTables() {
         divContainer.appendChild(divRow);
     }
 
-    jumbotronDiv.appendChild(divContainer);
-    coverTablesDiv.appendChild(jumbotronDiv);
+    containerDiv.appendChild(divContainer);
+    coverTablesDiv.appendChild(containerDiv);
 }
 
 function generateCoverTable(implicants, terms) {
@@ -227,13 +227,13 @@ function generateCoverTable(implicants, terms) {
     tr1.setAttribute("class", "bottom-bordered");
 
     var th1 = document.createElement("th");
-    th1.setAttribute("class", "success right-bordered");
+    th1.setAttribute("class", "bottom-bordered");
     tr1.appendChild(th1);
 
     for (var i = 0; i < terms.length; i++) {
         var th = document.createElement("th");
         var thText = document.createTextNode(terms[i]);
-        th.setAttribute("class", "bottom-bordered");
+        th.setAttribute("class", "success right-bordered");
         th.appendChild(thText);
         tr1.appendChild(th);
     }

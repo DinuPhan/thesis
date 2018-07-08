@@ -21,6 +21,8 @@
                         <p>Trang chủ</p>
                     </a> 
                 </li>
+
+
                 <li>
                     <a class="dropdown">
                         <i class="pe-7s-calculator"></i> 
@@ -53,6 +55,22 @@
                         </a>
                     </div>
                 </li>
+
+
+            {{--     <li>
+                    <a href="{{route('karnaughsolver')}}">
+                        <i class="pe-7s-calculator"></i> 
+                        <p>Rút gọn PP bìa Karnaugh</p>
+                    </a> 
+                </li>
+
+                <li>
+                    <a href="{{route('quinemccluskey')}}">
+                        <i class="pe-7s-usb"></i> 
+                        <p>Rút gọn PP Quine-McCluskey</p>
+                    </a> 
+                </li>
+ --}}
                 <li>
                     <a href="{{route('info')}}">
                         <i class="pe-7s-info"></i> 

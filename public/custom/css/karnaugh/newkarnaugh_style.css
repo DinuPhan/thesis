@@ -29,7 +29,7 @@
 }
 
 .container .eight.columns {
-    width: 44%;
+    width: 48%;
     padding-left: 2%;
 }
 
@@ -109,7 +109,7 @@ table {
 table caption {
     color: #000;
     font: italic 85%/1 arial, sans-serif;
-    padding: 1em 0;
+    padding: 1em 0.5em;
     text-align: center
 }
 

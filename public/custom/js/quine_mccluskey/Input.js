@@ -3,14 +3,10 @@
 function readInput() {
     //get input as a string
     var minTermsString = document.getElementById("Minterms").value;
-    var dontCaresString = document.getElementById("DontCares").value;
 
     //filter input and place it in an array of numbers
     minTerms = filterInput(minTermsString);
-    dontCares = filterInput(dontCaresString);
-
 }
-
 
 //prints an error message
 function printError() {

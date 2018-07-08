@@ -46,11 +46,11 @@
 						<input type="radio" onClick="ChangeVariableNumber(4)" ID="FourVariableRB" name="variables" class="dark remove-bottom">
 						4 Biến
 					</label>
-
+{{-- 
 					<label for"care" class="dark button half-bottom " style="text-align:left"> 
 						<input type="radio" onClick="ToggleDontCare()" ID="AllowDontCareCB" name="care" class="dark remove-bottom">
 						Allow Don't Care
-					</label>
+					</label> --}}
 				</div>
 				
 				<div class="eight columns add-bottom" style="display: block">    

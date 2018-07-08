@@ -121,5 +121,22 @@ QWERT#2--------------------------------------------------------DETAILS-KARNAUGH-
 
 QWERT#1-------------------------------------------------------------FLOW-QUiNE.JS
 
-+ Truyền input minterm (cú pháp: cách nhau dấu phẩy vd: 1,4,5,6,7,9s) vào để đọc và lọc ra thành mảng minterm (input.js)
+[Tóm tắt các bước]
+Các bước chính của việc tìm theo phương pháp Quine McCluskey
+- Sinh các prime implicants
+- Lập bảng các prime implicants
+- Tìm Essential Prime Implicant
+- Tìm dominated column
+- Tìm dominating row
+- Tối ưu các dominated column và các dominating rows
+- Tóm tắt quy trình
 
+
+[Cách chạy của chương trình]
+Input: Minterms được biểu diễn dưới dạng thập phân
+Output: Tổng các tích (S.O.P) tối tiểu cho hàm Bool 
+
+[Bước 1]:Sinh các prime implicants
++ Truyền input minterm (cú pháp: cách nhau dấu phẩy vd: 1,4,5,6,7,9) vào để đọc và lọc ra thành mảng minterm (input.js)
+
++ 

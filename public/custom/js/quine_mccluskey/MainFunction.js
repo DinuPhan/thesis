@@ -49,12 +49,15 @@ function main() {
     if (specialcase) {
         printOutput();
         clearSteps();
-        createDownloadButton();
         return;
     }
 
     //Part 1
+
     initializeGroupList();
+    // console.log('minTerms',minTerms,'dontCares',dontCares,'numberOfInputs',numberOfInputs);
+    // console.log('groupLists',groupLists,'primeImplicants',primeImplicants,'resultImplicants',resultImplicants);
+    // console.log('solutions',solutions,'specialcase',specialcase);
     initializeGroups();
     var i = 0;
     do {
@@ -95,3 +98,17 @@ function main() {
     printSteps();
 
 }
+
+// console.log('minterm ne',document.getElementById('Minterms'));
+// document.getElementById('Minterms').addEventListener('change',function(event){
+//     event.preventDefault();
+//     //Keycode 13 = Enter
+//     console.log('tao vo ne');
+//     if(isNaN(this.value)){
+//         console.log('tao vo ne');
+//         if(event.keyCode === 13){
+//             console.log('tao vo ne');
+//             main();
+//         }
+//     }
+// });

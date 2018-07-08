@@ -1,8 +1,352 @@
-.row {
-	font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+.quine-main {
+    /*background: #12f737;*/
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
     font-weight: 21px;
-    color: #13a7f3;
+    color: #0f5972;
     -webkit-font-smoothing: antialiased;
     -webkit-text-size-adjust: 100%
 }
+
+
+
+.fluid.container {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.fluid.container .column,
+.fluid.container .columns {
+    float: left;
+    display: inline;
+}
+
+
+.remove-bottom {
+    margin-bottom: 0 !important
+}
+
+.half-bottom {
+    margin-bottom: 10px !important
+}
+
+.add-bottom {
+    margin-bottom: 20px 
+}
+
+.container .sixteen.columns {
+    width: 100%;
+}
+
+.container .eight.columns {
+    width: 48%;
+    padding-left: 2%;
+}
+
+
+.well {
+    display: block;
+    /*background-color: #313c4e ;*/
+    padding: 10px ;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+.remove-bottom {
+    margin-bottom: 0
+}
+
+input[type="text"].full-width,
+input[type="password"].full-width,
+input[type="email"].full-width,
+textarea.full-width,
+select.full-width {
+    width: 100%;
+    text-align: center;
+}
+
+input[type="text"].half-width,
+input[type="password"].half-width,
+input[type="email"].half-width,
+textarea.half-width,
+select.half-width {
+    width: 50%;
+    text-align: center;
+
+}
+
+input[type="text"].auto-width,
+input[type="password"].auto-width,
+input[type="email"].auto-width,
+textarea.auto-width,
+select.auto-width {
+    width: auto;
+    text-align: center;
+
+}
+
+
+.button.full-width,
+a.button.full-width,
+button.full-width,
+input[type="submit"].full-width,
+input[type="reset"].full-width,
+input[type="button"].full-width {
+    width: 100%;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: center;
+    background: transparent;
+    border: none
+}
+
+
+.button,
+a.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+    background: #1baaf3;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+    -webkit-border-bottom-right-radius: 3px;
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+    -webkit-border-top-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+    -moz-background-clip: padding;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    color: #ffffff;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+    line-height: normal;
+    padding: 10px 15px;
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    border: none
+}
+
+.button:hover,
+a.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover {
+    color: #444;
+    background: #dcdcdc;
+    -webkit-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.25)
+}
+
+.button:active,
+a.button:active,
+button:active,
+input[type="submit"]:active,
+input[type="reset"]:active,
+input[type="button"]:active {
+    background: #bebebe;
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.25)
+}
+
+.button.full-width,
+a.button.full-width,
+button.full-width,
+input[type="submit"].full-width,
+input[type="reset"].full-width,
+input[type="button"].full-width {
+    width: 100%;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: center
+}
+
+.button.small,
+a.button.small,
+button.small,
+input[type="submit"].small,
+input[type="reset"].small,
+input[type="button"].small {
+    font-size: 13px;
+    padding: 7px 10px
+}
+
+.button.large,
+a.button.large,
+button.large,
+input[type="submit"].large,
+input[type="reset"].large,
+input[type="button"].large {
+    font-size: 15px;
+    padding: 14px 25px
+}
+
+
+.pull-center {
+    text-align: center
+}
+
+.pull-left {
+    float: left !important
+}
+
+.pull-right {
+    float: right !important
+}
+
+
+.header-color {
+    color: #13a7f3
+}
+
+table {
+    width: 100%;
+    empty-cells: show;
+    border-collapse: separate
+}
+
+table caption {
+    color: #000;
+    font: italic 85%/1 arial, sans-serif;
+    padding: 1em 0.5em;
+    text-align: center
+}
+
+table td,
+table th,
+.table-responsive td,
+.table-responsive th {
+    border-left: 1px solid #1D3253;
+    border-width: 0 0 0 3px;
+    font-size: inherit;
+    margin: 0;
+    overflow: visible;
+    padding: 10px 12px
+}
+
+table td:first-child,
+table th:first-child {
+    border-left-width: 0
+}
+
+table thead,
+.table-responsive  thead {
+    color: #13a7f3;
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+    border-collapse: separate;
+    text-align: middle;
+    font-weight: bold
+}
+
+table td {
+    background-color: transparent;
+}
+
+table.odd td {
+    background-color: #f2f2f2
+}
+
+table.striped tr:nth-child(even) td {
+    background-color: #f2f2f2
+}
+
+table.bordered {
+    border: 1px solid #ddd;
+    border-collapse: separate
+}
+
+table.bordered td {
+    border-bottom: 1px solid #ccc
+}
+
+table.bordered tbody>tr:first-child td {
+    border-top: 1px solid #ccc
+}
+
+table.bordered tbody>tr:last-child td,
+table.horizontal tbody>tr:last-child td {
+    border-bottom-width: 0
+}
+
+table.horizontal td,
+table.horizontal th {
+    border-width: 0 0 1px 0;
+    border-bottom: 1px solid #cbcbcb
+}
+
+table.horizontal tbody>tr:last-child td {
+    border-bottom-width: 0
+}
+
+table tr:hover {
+    opacity: 1 !important
+}
+
+caption,th{
+    text-align:center !important
+}
+
+
+input::placeholder { /* Chrome/Opera/Safari */
+  color: green!
+}
+
+
+div .SmallKMaps{
+    /* To correctly align image, regardless of content height: */
+    vertical-align: top !important;
+    display: inline-block !important;
+    /* To horizontally center images and caption */
+    text-align: center !important;
+    /* The width of the container also implies margin around the images. */
+    width: 200px !important;
+    padding: 5px 10px !important;
+}
+
+.caption {
+    /* Make the caption a block so it occupies its own line. */
+    display: block;
+}
+
+#StepByStep p{
+    color: #13a7f3;
+    padding: 5px 10px !important;
+    margin-bottom: 0 !important
+}
+#StepByStep ol:{
+    padding-left: 0px;
+}
+
+#StepByStep ol > ol{
+    padding-left: 6em;
+}
+
+ol.a {
+    list-style-type: circle;
+}
+
+ol.b {
+    list-style-type: square;
+}
+#StepByStep .caption{
+    color: #13a7f3;
+}
+
+
