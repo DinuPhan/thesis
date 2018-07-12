@@ -83,18 +83,3 @@ function generateBinaryString(x,bitsCovered){
     return res;    
 }
 
-
-//compare equality of two implicants arr
-function isEqualImplicants(impArr1, impArr2){
-    for (var i = 0; i < impArr1.length; i++){
-        if(!impArr2.includes(impArr1[i])){
-            return false;
-        }
-    }
-    for (var i = 0; i < impArr2.length; i++){
-        if(!impArr1.includes(impArr2[i])){
-            return false;
-        }
-    }
-    return true;
-}

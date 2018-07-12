@@ -41,61 +41,58 @@ function checkEssentialImplicants() {
 	}
 
 
-	// var currentEssentialImplicants = {};
-	// currentEssentialImplicants.implicants = new Array();
-	// currentEssentialImplicants.uniquecell = new Array();
-
 	var currentEssentialImplicants = new Array();
 	var currentUniqueMinTermsPositions = new Array();
-	for (var i=0; i<uncoveredMinTerms.length; i++) {
 
+	// Find the essential implicants of the given remaining implicants and indexes of the unique minterms
+	for (var i=0; i<uncoveredMinTerms.length; i++) {
+		if (termsCoverCount[uncoveredMinTerms[i]] == 1) {
+			for (var j=0; j<remainingImplicants.length; j++) {
+				var primeImplicantMinterms = remainingImplicants[j].mintermsCovered;
+				if (primeImplicantMinterms.includes(uncoveredMinTerms[i])){
+					currentEssentialImplicants.push(remainingImplicants[j]);
+					currentUniqueMinTermsPositions.push(primeImplicantMinterms.indexOf(uncoveredMinTerms[i]));
+				}
+			}
+		}
+	}
+
+
+	for (var i=0; i<uncoveredMinTerms.length; i++) {
 		//if a term is only covered by one implicant,
 		//find the implicant and add it to resultImplicants
 		if (termsCoverCount[uncoveredMinTerms[i]] == 1) {
 			for (var j=0; j<remainingImplicants.length; j++) {
 
 				var primeImplicantMinterms = remainingImplicants[j].mintermsCovered;
-				if (primeImplicantMinterms.includes(uncoveredMinTerms[i])){
-					currentEssentialImplicants.push(remainingImplicants[j]);
-					currentUniqueMinTermsPositions.push(primeImplicantMinterms.indexOf(uncoveredMinTerms[i]));
-					// currentEssentialImplicants.implicants.push(remainingImplicants[j]);
-					// currentEssentialImplicants.uniquecell.push( primeImplicantMinterms.indexOf(uncoveredMinTerms[i]));
-					// currentEssentialImplicants.push({implicant: remainingImplicants[j], uniquecell: primeImplicantMinterms.indexOf(uncoveredMinTerms[i])})
+				if (primeImplicantMinterms.includes(uncoveredMinTerms[i])) {
+					//remove all minterms this implicant covers
+					var originaluncoveredMinTerms = uncoveredMinTerms.slice();
+					var originalremainingImplicants = remainingImplicants.slice();
+					for (var k=0; k<primeImplicantMinterms.length; k++) {
+						if (uncoveredMinTerms.includes(primeImplicantMinterms[k])) {
+							var termIndex = uncoveredMinTerms.indexOf(primeImplicantMinterms[k]);
+							uncoveredMinTerms.splice(termIndex,1);
+						}
+					}
+					var tempuncoveredMinTerms = uncoveredMinTerms.slice();
+
+					//add implicant to resultImplicants and remove it from remainingImplicants
+					var tempremoveImplicant = remainingImplicants[j];
+
+					resultImplicants.push(remainingImplicants[j]);
+					remainingImplicants.splice(j,1);
+					var tempremainingImplicants = remainingImplicants.slice();
+					essentialImplicantFound = true;
+					eliminationRecords.push({code:"EI",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, removedImplicant: tempremoveImplicant, essentialImplicants: currentEssentialImplicants, uniqueMinTermsPositions: currentUniqueMinTermsPositions});
 				}
-
-
-				// if (primeImplicantMinterms.includes(uncoveredMinTerms[i])) {
-				// 	//remove all minterms this implicant covers
-				// 	var originaluncoveredMinTerms = uncoveredMinTerms.slice();
-				// 	var originalremainingImplicants = remainingImplicants.slice();
-				// 	for (var k=0; k<primeImplicantMinterms.length; k++) {
-				// 		if (uncoveredMinTerms.includes(primeImplicantMinterms[k])) {
-				// 			var termIndex = uncoveredMinTerms.indexOf(primeImplicantMinterms[k]);
-				// 			uncoveredMinTerms.splice(termIndex,1);
-				// 		}
-				// 	}
-				// 	var tempuncoveredMinTerms = uncoveredMinTerms.slice();
-
-				// 	//add implicant to resultImplicants and remove it from remainingImplicants
-				// 	var tempremoveImplicant = remainingImplicants[j];
-
-				// 	resultImplicants.push(remainingImplicants[j]);
-				// 	remainingImplicants.splice(j,1);
-				// 	var tempremainingImplicants = remainingImplicants.slice();
-				// 	essentialImplicantFound = true;
-				// 	eliminationRecords.push({code:"EI",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, removedImplicant: tempremoveImplicant});
-				// 	essentialImplicants.push({currentCoveredMinTerms: originaluncoveredMinTerms, currentRemainingImplicants: originalremainingImplicants,esImplicant: tempremoveImplicant, cell: j});
-
-				// 	// checkRowDominance(eliminationRecords[eliminationRecords.length-1].remainingImplicants);
-				// 	// checkColumnDominance(eliminationRecords[eliminationRecords.length-1].uncoveredMinterms);
-				// }
 			}
 		}
 	}
-	essentialImplicants = currentEssentialImplicants.slice(0);
-	uniqueMinTermsPositions = currentUniqueMinTermsPositions.slice(0);
 	return essentialImplicantFound;
 }
+
+
 
 //compares every two rows to check for row dominance
 function checkRowDominance() {

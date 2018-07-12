@@ -12,8 +12,8 @@ var specialcase;
 var remainingImplicants;
 var uncoveredMinTerms;
 var eliminationRecords;
-var essentialImplicants;
-var uniqueMinTermsPositions;
+// var essentialImplicants;
+// var uniqueMinTermsPositions;
 
 function main() {
 
@@ -26,8 +26,8 @@ function main() {
     solutions = [];
     solutionsExpressions = [];
     eliminationRecords = new Array();
-    essentialImplicants = new Array();
-    uniqueMinTermsPositions = new Array();
+    // essentialImplicants = new Array();
+    // uniqueMinTermsPositions = new Array();
     //Part 0
     readInput(); //put them in Array minTerms & dontCares
 
@@ -73,8 +73,8 @@ function main() {
     groupLists.pop();
 
     //Part 2
-    console.log('groupLists',groupLists,'primeImplicants',primeImplicants,'resultImplicants',resultImplicants);
-    console.log('solutions',solutions,'specialcase',specialcase);
+    // console.log('groupLists',groupLists,'primeImplicants',primeImplicants,'resultImplicants',resultImplicants);
+    // console.log('solutions',solutions,'specialcase',specialcase);
     eliminationProcess();
    
 

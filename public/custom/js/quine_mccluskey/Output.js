@@ -40,7 +40,6 @@ function printSteps() {
         generateGroupListsTables();
     }
 
-    console.log('uncoveredMinTerms',uncoveredMinTerms,uncoveredMinTerms != undefined );
     if (uncoveredMinTerms != undefined) {
         generateCoverTables();
     }
@@ -206,71 +205,57 @@ function generateCoverTables() {
 
     var divRow = document.createElement("div");
     divRow.setAttribute("class", "row text-center");
-    divRow.appendChild(generateCoverTable(primeImplicants, minTerms,essentialImplicants));
+    divRow.appendChild(generateCoverTable(primeImplicants, minTerms,findEssentialImplicants(primeImplicants,minTerms).essentialImplicants,findEssentialImplicants(primeImplicants,minTerms).uniqueMinTermsPositions));
     divContainer.appendChild(divRow);
 
-    // if (eliminationRecords[i].uncoveredMinterms.length > 0) {
-    //      var htemp = document.createElement("h3");
-    //      console.log('eliminationRecords[i]', eliminationRecords[i]);
-    //      var htempText = document.createTextNode("Sau khi loại trừ essential implicant: " + generateImplicantExpression(eliminationRecords[i].removedImplicants));
-    //      htemp.appendChild(htempText);
-    //      divContainer.appendChild(htemp);
+    for (var i = 0; i < eliminationRecords.length; i++){
+        if (eliminationRecords[i].code == "EI"){
+            if (eliminationRecords[i].uncoveredMinterms.length > 0){
+                var htemp = document.createElement("h3");
+                var htempText =  document.createTextNode("Sau khi loại trừ essential implicant: "+ generateImplicantExpression(eliminationRecords[i].removedImplicant));
+                htemp.appendChild(htempText);
+                divContainer.appendChild(htemp);
 
-    //      var divRow = document.createElement("div");
-    //      divRow.setAttribute("class", "row text-center");
-    //      divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms,essentialImplicants));
-    //      divContainer.appendChild(divRow);
-    //  }
+                var divRow = document.createElement("div");
+                divRow.setAttribute("class", "row text-center");
+                divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms,eliminationRecords[i].essentialImplicants, eliminationRecords[i].uniqueMinTermsPositions));
+                divContainer.appendChild(divRow);
+            }
+        }
+        // else if (eliminationRecords[i].code == "RD"){
+        //     if (eliminationRecords[i].uncoveredMinterms.length > 0){
+        //         var htemp = document.createElement("h3");
+        //         console.log('eliminationRecords[i]',eliminationRecords[i]);
+        //         var htempText =  document.createTextNode("Sau khi loại trừ dominated row: "+ generateImplicantExpression(eliminationRecords[i].dominatedRow));
+        //         htemp.appendChild(htempText);
+        //         divContainer.appendChild(htemp);
 
-    // for (var i = 0; i < eliminationRecords.length; i++){
-    //     if (eliminationRecords[i].code == "EI"){
-    //         if (eliminationRecords[i].uncoveredMinterms.length > 0){
-    //             var htemp = document.createElement("h3");
-    //             console.log('eliminationRecords[i]',eliminationRecords[i]);
-    //             var htempText =  document.createTextNode("Sau khi loại trừ essential implicant: "+ generateImplicantExpression(eliminationRecords[i].removedImplicants));
-    //             htemp.appendChild(htempText);
-    //             divContainer.appendChild(htemp);
+        //         var divRow = document.createElement("div");
+        //         divRow.setAttribute("class", "row text-center");
+        //         divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
+        //         divContainer.appendChild(divRow);
+        //     }
+        // }
+        // else if (eliminationRecords[i].code == "CD"){
+        //     if (eliminationRecords[i].uncoveredMinterms.length > 0){
+        //         var htemp = document.createElement("h3");
+        //         console.log('eliminationRecords[i]',eliminationRecords[i]);
+        //         var htempText =  document.createTextNode("Sau khi loại trừ dominated column: "+ eliminationRecords[i].dominatedColumn);
+        //         htemp.appendChild(htempText);
+        //         divContainer.appendChild(htemp);
 
-    //             var divRow = document.createElement("div");
-    //             divRow.setAttribute("class", "row text-center");
-    //             divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
-    //             divContainer.appendChild(divRow);
-    //         }
-    //     }
-    //     else if (eliminationRecords[i].code == "RD"){
-    //         if (eliminationRecords[i].uncoveredMinterms.length > 0){
-    //             var htemp = document.createElement("h3");
-    //             console.log('eliminationRecords[i]',eliminationRecords[i]);
-    //             var htempText =  document.createTextNode("Sau khi loại trừ dominated row: "+ generateImplicantExpression(eliminationRecords[i].dominatedRow));
-    //             htemp.appendChild(htempText);
-    //             divContainer.appendChild(htemp);
-
-    //             var divRow = document.createElement("div");
-    //             divRow.setAttribute("class", "row text-center");
-    //             divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
-    //             divContainer.appendChild(divRow);
-    //         }
-    //     }
-    //     else if (eliminationRecords[i].code == "CD"){
-    //         if (eliminationRecords[i].uncoveredMinterms.length > 0){
-    //             var htemp = document.createElement("h3");
-    //             console.log('eliminationRecords[i]',eliminationRecords[i]);
-    //             var htempText =  document.createTextNode("Sau khi loại trừ dominated column: "+ eliminationRecords[i].dominatedColumn);
-    //             htemp.appendChild(htempText);
-    //             divContainer.appendChild(htemp);
-
-    //             var divRow = document.createElement("div");
-    //             divRow.setAttribute("class", "row text-center");
-    //             divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
-    //             divContainer.appendChild(divRow);
-    //         }
-    //     }
-    // }
+        //         var divRow = document.createElement("div");
+        //         divRow.setAttribute("class", "row text-center");
+        //         divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
+        //         divContainer.appendChild(divRow);
+        //     }
+        // }
+    }
     containerDiv.appendChild(divContainer);
     coverTablesDiv.appendChild(containerDiv);
 }
 
-function generateCoverTable(implicants, terms, essentialImplicants) {
+function generateCoverTable(implicants, terms, essentialImplicants, uniqueMinTermsPositions) {
     var divTableResponsive = document.createElement("div");
     divTableResponsive.setAttribute("class", "table-responsive");
 
@@ -296,7 +281,6 @@ function generateCoverTable(implicants, terms, essentialImplicants) {
 
     var tbody = document.createElement("tbody");
 
-    console.log('essentialImplicants',essentialImplicants);
     for (var i = 0; i < implicants.length; i++) {
         if(essentialImplicants.includes(implicants[i])){
             var termsCovered = implicants[i].mintermsCovered;
@@ -454,4 +438,42 @@ function isArraysEqual(impArr1, impArr2){
         }
     }
     return true;
+}
+
+// Return the object of Essential Implicants and positions of unique minterms
+function findEssentialImplicants(givenImplicants, givenMinTerms){
+    var termsCoverCount = [];
+    //iterate on all implicant and increment the count
+    //for each min term they cover
+    for (var i=0; i<givenImplicants.length; i++) {
+        var primeImplicant = givenImplicants[i];
+        for (var j=0; j<primeImplicant.mintermsCovered.length; j++) {
+            var term = primeImplicant.mintermsCovered[j];
+
+            //if first time to cover a term, initialize its place with 1
+            if (termsCoverCount[term] == undefined) {
+                termsCoverCount[term] = 1;
+            } else {
+                termsCoverCount[term]++;
+            }
+        }
+    }
+
+    var currentEssentialImplicants = new Array();
+    var currentUniqueMinTermsPositions = new Array();
+    var result = {};
+
+    // Find the essential implicants of the given remaining implicants and indexes of the unique minterms
+    for (var i=0; i<givenMinTerms.length; i++) {
+        if (termsCoverCount[givenMinTerms[i]] == 1) {
+            for (var j=0; j<givenImplicants.length; j++) {
+                var primeImplicantMinterms = givenImplicants[j].mintermsCovered;
+                if (primeImplicantMinterms.includes(givenMinTerms[i])){
+                    currentEssentialImplicants.push(givenImplicants[j]);
+                    currentUniqueMinTermsPositions.push(primeImplicantMinterms.indexOf(givenMinTerms[i]));
+                }
+            }
+        }
+    }
+    return {essentialImplicants: currentEssentialImplicants, uniqueMinTermsPositions: currentUniqueMinTermsPositions};
 }
