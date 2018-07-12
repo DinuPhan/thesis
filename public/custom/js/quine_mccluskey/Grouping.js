@@ -27,7 +27,7 @@ function groupingProcess(currentGroupList, generatedGroupList) {
     return generatedGroupList;
 }
 
-// this function return new group to br added in the new groupList
+// this function return new group to be added in the new groupList
 function grouping(firstGroup, secondGroup, resultDegree) {
     var resultImplicants = [];
     for (var i = 0; i < firstGroup.length; i++) {

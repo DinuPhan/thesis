@@ -40,6 +40,7 @@ function printSteps() {
         generateGroupListsTables();
     }
 
+    console.log('uncoveredMinTerms',uncoveredMinTerms,uncoveredMinTerms != undefined );
     if (uncoveredMinTerms != undefined) {
         generateCoverTables();
     }
@@ -74,6 +75,10 @@ function generateGroupListsTables() {
     var header = document.createElement("h3");
     var headerText = document.createTextNode("Quá trình gom nhóm");
     header.appendChild(headerText);
+
+    var guide = document.createElement("p");
+    var guideText = document.createTextNode("");
+    guide.appendChild(guideText);
 
     for (var i = 0; i < groupLists.length; i++) {
         groupListTable = generateGroupListTable(groupLists[i], i);
@@ -117,8 +122,8 @@ function generateGroupListTable(groupList, index) {
     var thead = document.createElement("thead");
     var tr1 = document.createElement("tr");
     var th = document.createElement("th");
-    th.setAttribute("colspan", 2);
-    th.setAttribute("class", "success");
+    th.setAttribute("colspan", 3);
+    th.setAttribute("class","success");
     thText = document.createTextNode("Tế bào kích thước " + Math.pow(2, index));
     th.appendChild(thText);
 
@@ -159,6 +164,10 @@ function generateGroupListTableBody(groupList) {
             td1.appendChild(td1Text);
 
             var td2 = document.createElement("td");
+            td2Text = document.createTextNode(imp.bitsRepresentation);
+            td2.appendChild(td2Text);
+
+            var td3 = document.createElement("td");
             var symbol;
             if (imp.isChecked) {
                 symbol = "✓";
@@ -170,10 +179,11 @@ function generateGroupListTableBody(groupList) {
                 symbol = symbol + " Dont care";
             }
             td2Text = document.createTextNode(symbol);
-            td2.appendChild(td2Text);
+            td3.appendChild(td2Text);
 
             tr.appendChild(td1);
             tr.appendChild(td2);
+            tr.appendChild(td3);
             tbody.appendChild(tr);
         }
     }
@@ -196,26 +206,71 @@ function generateCoverTables() {
 
     var divRow = document.createElement("div");
     divRow.setAttribute("class", "row text-center");
-    divRow.appendChild(generateCoverTable(primeImplicants, minTerms));
+    divRow.appendChild(generateCoverTable(primeImplicants, minTerms,essentialImplicants));
     divContainer.appendChild(divRow);
 
-    if (uncoveredMinTerms.length > 0) {
-        var h4 = document.createElement("h4");
-        var h4Text = document.createTextNode("Sau khi loại trừ: ");
-        h4.appendChild(h4Text);
-        divContainer.appendChild(h4);
+    // if (eliminationRecords[i].uncoveredMinterms.length > 0) {
+    //      var htemp = document.createElement("h3");
+    //      console.log('eliminationRecords[i]', eliminationRecords[i]);
+    //      var htempText = document.createTextNode("Sau khi loại trừ essential implicant: " + generateImplicantExpression(eliminationRecords[i].removedImplicants));
+    //      htemp.appendChild(htempText);
+    //      divContainer.appendChild(htemp);
 
-        var divRow = document.createElement("div");
-        divRow.setAttribute("class", "row text-center");
-        divRow.appendChild(generateCoverTable(remainingImplicants, uncoveredMinTerms));
-        divContainer.appendChild(divRow);
-    }
+    //      var divRow = document.createElement("div");
+    //      divRow.setAttribute("class", "row text-center");
+    //      divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms,essentialImplicants));
+    //      divContainer.appendChild(divRow);
+    //  }
 
+    // for (var i = 0; i < eliminationRecords.length; i++){
+    //     if (eliminationRecords[i].code == "EI"){
+    //         if (eliminationRecords[i].uncoveredMinterms.length > 0){
+    //             var htemp = document.createElement("h3");
+    //             console.log('eliminationRecords[i]',eliminationRecords[i]);
+    //             var htempText =  document.createTextNode("Sau khi loại trừ essential implicant: "+ generateImplicantExpression(eliminationRecords[i].removedImplicants));
+    //             htemp.appendChild(htempText);
+    //             divContainer.appendChild(htemp);
+
+    //             var divRow = document.createElement("div");
+    //             divRow.setAttribute("class", "row text-center");
+    //             divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
+    //             divContainer.appendChild(divRow);
+    //         }
+    //     }
+    //     else if (eliminationRecords[i].code == "RD"){
+    //         if (eliminationRecords[i].uncoveredMinterms.length > 0){
+    //             var htemp = document.createElement("h3");
+    //             console.log('eliminationRecords[i]',eliminationRecords[i]);
+    //             var htempText =  document.createTextNode("Sau khi loại trừ dominated row: "+ generateImplicantExpression(eliminationRecords[i].dominatedRow));
+    //             htemp.appendChild(htempText);
+    //             divContainer.appendChild(htemp);
+
+    //             var divRow = document.createElement("div");
+    //             divRow.setAttribute("class", "row text-center");
+    //             divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
+    //             divContainer.appendChild(divRow);
+    //         }
+    //     }
+    //     else if (eliminationRecords[i].code == "CD"){
+    //         if (eliminationRecords[i].uncoveredMinterms.length > 0){
+    //             var htemp = document.createElement("h3");
+    //             console.log('eliminationRecords[i]',eliminationRecords[i]);
+    //             var htempText =  document.createTextNode("Sau khi loại trừ dominated column: "+ eliminationRecords[i].dominatedColumn);
+    //             htemp.appendChild(htempText);
+    //             divContainer.appendChild(htemp);
+
+    //             var divRow = document.createElement("div");
+    //             divRow.setAttribute("class", "row text-center");
+    //             divRow.appendChild(generateCoverTable(eliminationRecords[i].remainingImplicants, eliminationRecords[i].uncoveredMinterms));
+    //             divContainer.appendChild(divRow);
+    //         }
+    //     }
+    // }
     containerDiv.appendChild(divContainer);
     coverTablesDiv.appendChild(containerDiv);
 }
 
-function generateCoverTable(implicants, terms) {
+function generateCoverTable(implicants, terms, essentialImplicants) {
     var divTableResponsive = document.createElement("div");
     divTableResponsive.setAttribute("class", "table-responsive");
 
@@ -241,29 +296,81 @@ function generateCoverTable(implicants, terms) {
 
     var tbody = document.createElement("tbody");
 
-    for (var i = 0; i < primeImplicants.length; i++) {
-        var termsCovered = primeImplicants[i].mintermsCovered;
+    console.log('essentialImplicants',essentialImplicants);
+    for (var i = 0; i < implicants.length; i++) {
+        if(essentialImplicants.includes(implicants[i])){
+            var termsCovered = implicants[i].mintermsCovered;
+            var tr = document.createElement("tr");
 
-        var tr = document.createElement("tr");
+            var th = document.createElement("th");
 
-        var th = document.createElement("th");
+            var thText = document.createTextNode(generateImplicantExpression(implicants[i]));
+            th.setAttribute("class", "right-bordered");
+            th.appendChild(thText);
+            tr.appendChild(th);
 
-        var thText = document.createTextNode(generateImplicantExpression(primeImplicants[i]));
-        th.setAttribute("class", "right-bordered");
-        th.appendChild(thText);
-        tr.appendChild(th);
-
-        for (var j = 0; j < terms.length; j++) {
-            var td = document.createElement("td");
-            if (termsCovered.includes(terms[j])) {
-                var tdText = document.createTextNode("X");
-                td.appendChild(tdText);
+            for (var j = 0; j < terms.length; j++) {
+                var td = document.createElement("td");
+                td.setAttribute("class","essential-implicant w3-white");
+                var index = essentialImplicants.indexOf(implicants[i]);
+                if (termsCovered.includes(terms[j])){
+                    var currentCoveredTermIndex = termsCovered.indexOf(terms[j]);
+                    if (currentCoveredTermIndex == uniqueMinTermsPositions[index]){
+                        var tdContainer = document.createElement("span");
+                        tdContainer.setAttribute("class","w3-badge w3-red");
+                        var tdText = document.createTextNode("X");
+                        tdContainer.appendChild(tdText);
+                        td.appendChild(tdContainer);
+                    }
+                    else{
+                        var tdText = document.createTextNode("X");
+                        td.appendChild(tdText);
+                    }
+                }
+                tr.appendChild(td);
             }
-
-            tr.appendChild(td);
+            tbody.appendChild(tr);
         }
+        else{
+            var termsCovered = implicants[i].mintermsCovered;
+            var tr = document.createElement("tr");
 
-        tbody.appendChild(tr);
+            var th = document.createElement("th");
+
+            var thText = document.createTextNode(generateImplicantExpression(implicants[i]));
+            th.setAttribute("class", "right-bordered");
+            th.appendChild(thText);
+            tr.appendChild(th);
+
+            for (var j = 0; j < terms.length; j++) {
+                var td = document.createElement("td");
+                if (termsCovered.includes(terms[j])) {
+                    var tdText = document.createTextNode("X");
+                    td.appendChild(tdText);
+                }
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        }
+        // var termsCovered = implicants[i].mintermsCovered;
+        // var tr = document.createElement("tr");
+
+        // var th = document.createElement("th");
+
+        // var thText = document.createTextNode(generateImplicantExpression(implicants[i]));
+        // th.setAttribute("class", "right-bordered");
+        // th.appendChild(thText);
+        // tr.appendChild(th);
+
+        // for (var j = 0; j < terms.length; j++) {
+        //     var td = document.createElement("td");
+        //     if (termsCovered.includes(terms[j])) {
+        //         var tdText = document.createTextNode("X");
+        //         td.appendChild(tdText);
+        //     }
+        //     tr.appendChild(td);
+        // }
+        // tbody.appendChild(tr);
     }
 
     table.appendChild(thead);
@@ -331,4 +438,20 @@ function generateImplicantExpression(imp) {
     }
 
     return charArr.join('');
+}
+
+
+//compare equality of two implicants arr
+function isArraysEqual(impArr1, impArr2){
+    for (var i = 0; i < impArr1.length; i++){
+        if(!impArr2.includes(impArr1[i])){
+            return false;
+        }
+    }
+    for (var i = 0; i < impArr2.length; i++){
+        if(!impArr1.includes(impArr2[i])){
+            return false;
+        }
+    }
+    return true;
 }

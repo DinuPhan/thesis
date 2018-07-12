@@ -64,7 +64,7 @@
                 <div class="sixteen columns well add-bottom">
                     <div class="eight columns add-bottom" style="display: block">
                         <label class="header-color remove-bottom half-width pull-left" for="Input"><font size=4>F = Σ<small>m  &nbsp;</small></font></label>
-                         <input type="text" class="remove-bottom half-width pull-center" id="Minterms" placeholder="Nhập các minterms" style="font-style: italic;">
+                         <input type="text" class="remove-bottom half-width pull-center" id="Minterms" placeholder="Nhập các minterms" value="0,1,2,5,6,7,8,9,10,14" style="font-style: italic;">
                          <br>
                          <br>
                         <p class="header-color half-bottom">

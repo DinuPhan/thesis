@@ -1170,6 +1170,7 @@ body > .navbar-collapse[data-color="purple"]:after {
 }
 .table > tbody > tr {
   position: relative;
+  text-align: center;
 }
 .table > tbody > tr:hover .td-actions .btn {
   opacity: 1;

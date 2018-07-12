@@ -8,7 +8,9 @@
     -webkit-text-size-adjust: 100%
 }
 
-
+tbody .top-bordered:not(:first-child){
+    border-top: 3px dashed #1f9dc6 !important
+}
 
 .fluid.container {
     position: relative;
@@ -217,7 +219,6 @@ input[type="button"].large {
 table {
     width: 100%;
     empty-cells: show;
-    border-collapse: separate
 }
 
 table caption {
@@ -350,3 +351,23 @@ ol.b {
 }
 
 
+.w3-badge{
+    border-radius:50%;
+    display: inline-block;
+    width: 45%;
+}
+
+.w3-red
+,.w3-hover-red:hover{
+    color:#fff!important;
+    background-color:#ff5714 !important
+}
+
+.w3-white{
+     color:#fff!important;
+}
+
+
+.essential-implicant{
+    background-color: #146f8d;
+}

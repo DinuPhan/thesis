@@ -21,6 +21,7 @@ var Heavy = 100;
 //Global variable for step by step explanation
 var LargeRects = new Array();					// Large rects (size of 4 and 2) found in step 1
 var Step2Rects = new Array();					// Rects that cover 1-weight cells in step 2
+var flagStep2 = false;
 var flagStep3 = false;							// Flag to see if the rects in step 2 coverted all the Kmap or not
 var LeftoverCells = new Array();				// the cells that isCovered = false after using Step2Rects to cover the Kmap
 var explanation = new Array();					// record structure for each iterations in Step3's finding all possible combinations
@@ -148,6 +149,7 @@ function Load()
 
 	//Hide the stepbystep explanation at first
 	$("#StepByStep").hide();
+	$("#Step_2").hide();
 	$("#Step_3").hide();
 }
 
@@ -394,25 +396,17 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    //if the Kmap is Convered, jump to Step 4
 	    if (isKMapCoveredBy(Weights,Step2Rects) == false){
 	    	flagStep3 = true;
-
 	    	LeftoverCells = findLeftoverCells(Weights);
-
 	    	//Every leftover cell will store:
 			// 1) the position (.Pos)
 			// 2) Rects that is covering the leftover cell (more than 2 because leftover cells are not 1-weight cell) (.Rects)
-	    	var PossibleCombs = (determinePossibleCombs(LeftoverCells)).slice(0);
-
+	    	var Step3_Combinations = (determinePossibleCombs(LeftoverCells)).slice(0);
 	    	// Add the Step2_Rects to Step3 combination
-	    	for (var i = 0; i < PossibleCombs.length; i++){
+	    	for (var i = 0; i < Step3_Combinations.length; i++){
 	    		// Because unshift append to the left => we append from last to top
 	    		for (var j = Step2Rects.length-1; j >= 0; j--){
-	    			PossibleCombs[i].unshift(Step2Rects[j].Rect);
+	    			Step3_Combinations[i].unshift(Step2Rects[j].Rect);
 	    		}	
-	    	}
-	    	var Step3_Combinations = new Array();
-	    	for (var i = 0; i < PossibleCombs.length; i++){
-	    		// Step3_Combinations.push(sortRectsByWeight(PossibleCombs[i]));
-	    		Step3_Combinations.push(PossibleCombs[i]);
 	    	}
 	    	return Step3_Combinations;
 	    }
@@ -454,16 +448,21 @@ function Search()
 
     // Collect all the larger rectangles (Step 1 - Explanation)
     LargeRects = Rects.concat(Rects2x1);
-    if(TestRect(CreateRect(3,3,2,2),true) && IsRectDuplicateIn(CreateRect(3,3,2,2),LargeRects) == false){
+
+    //Special cases: have to add the special Rect (3,3,2,2) even if it's covered by others rects (other rects must be more than 2)
+    //so that we can find better coverage in Step3 iteration with that special Rect (3,3,2,2)
+    if(TestRect(CreateRect(3,3,2,2),true) && IsRectDuplicateIn(CreateRect(3,3,2,2),LargeRects) == false && LargeRects.length >= 2){
     	LargeRects.push(CreateRect(3,3,2,2));
     }
-    // console.log('LargeRects',LargeRects);
 
     // FindBestCoverage(Rects2x1, Rects);
     var BestCoverage = FindBestCoverage(Rects2x1, Rects);
 
-    //Clone the BestCoverage to global scope variables for manipulating
-    Step4Equations = BestCoverage.slice(0);
+    //Cut all the BestCoverage to global scope Step4Equations for manipulating
+    Step4Equations = BestCoverage.splice(0);
+   	
+   	// recreate BestCoverage again because it's empty now
+    BestCoverage = FindBestCoverage(Rects2x1, Rects);
 
     // 1x1 sized rects 
     for (var i = 0; i < BestCoverage.length; i++){
@@ -490,6 +489,11 @@ function Search()
 	    for (var k = 0; k < deleteIndexes.length; k++){
 	    	BestCoverage[i].splice(deleteIndexes[k]-k,1);
 	    }
+    }
+
+    // If there is none large Rects => all are unique cells => add the unique cells to the Step4Equation
+    if(Step4Equations[0].length == 0){
+    	Step4Equations = BestCoverage.slice(0);
     }
 
 	ClearEquation();
@@ -672,19 +676,15 @@ function determinePossibleCombs(LeftoverCells){
 	var remainCells = LeftoverCells.slice(0); 			// make a clone of LeftoverCells to feed to the backtracking
 	var availableRects = ListAvailableRects(LeftoverCells); // List of available rects (not include Step2Rects - compulsory rects)
 	var resultsCombs = new Array();						// Store all the accepted combinations (results)
-	var currentComb = new Array();
-	var startIndex = 0;
-	var group = 0;
+	var currentComb = new Array();						// Store the current combination
+	var startIndex = 0;									// Start from the first Rect in available rects
+	var group = 0;										// indent level
 	explanation = new Array();
 	totalnodes = 0;
 	countCovered = 0; 								//count number of minimal expressions
 
 	findCombination(startIndex, remainCells, availableRects, currentComb, resultsCombs, explanation,group);
 
-
-	console.log('explanation',explanation);
-	console.log('-------------------');
-	// console.log('resultsCombs',resultsCombs);
 	return resultsCombs;
 }
 
@@ -716,7 +716,7 @@ function findCombination(index, remainCells, availableRects, currentComb, result
 
 
  	// Record the run for later traceback
- 	curExplain.indent = index;
+ 	curExplain.index = index;
 	curExplain.add = availableRects[index];
 	curExplain.curComb = currentComb.slice(0);
  	explanation.push(curExplain);
@@ -814,9 +814,6 @@ function isKMapCovereByCurrentCombination(curComb){
 	for (let i = 0; i < curComb.length; i++){
 		if (!IsCovered(curComb[i])){
 			Cover(curComb[i],true);
-		}
-		else {
-			return false;
 		}
 	}
 
@@ -943,21 +940,21 @@ function sortRectsByWeight(Rects) {
 }
 
 //Return the index of minimal S.O.P expression
-function getMinimalIndex(Step4Equations){
-	if(Step4Equations.length > 2){
+function getMinimalIndex(Equations){
+	if(Equations.length > 2){
 		var minimalCombIndexes = new Array();
-		var minElement = Step4Equations[0].length;
+		var minElement = Equations[0].length;
 		//find Equation that has the least term
-		for (var i = 1; i < Step4Equations.length; i++){
-			if(Step4Equations[i].length < minElement){
-				minElement = Step4Equations[i].length;
+		for (var i = 1; i < Equations.length; i++){
+			if(Equations[i].length < minElement){
+				minElement = Equations[i].length;
 			}
 		}
 
 		var subArray = new Array();
-		for (var i = 0; i < Step4Equations.length; i++){
-			if(Step4Equations[i].length == minElement){
-				subArray.push({Rect: Step4Equations[i],Index: i});
+		for (var i = 0; i < Equations.length; i++){
+			if(Equations[i].length == minElement){
+				subArray.push({Rect: Equations[i],Index: i});
 			}
 		}
 		var maxWeight = combWeight(subArray[0].Rect);
@@ -1025,6 +1022,7 @@ function UpdateUI()
     }
     SetInnerHTML("EquationDiv", GenerateEquationHTML());
     $("#StepByStep").hide();
+
     SetInnerHTML("Step_1",GenerateStep1HTML());
     SetInnerHTML("Step_2",GenerateStep2HTML());
     SetInnerHTML("Step_3",GenerateStep3HTML());
@@ -1308,89 +1306,107 @@ function GenerateEquationHTML()
 
 function GenerateStep1HTML(){
 	var i;
-	var Text = "<p class=\"header-color remove-bottom\" style=\"padding: 5px 10px !important;\"><b>Bước 1:</b> Biểu đồ Karnaugh của <i>f</i> có "+LargeRects.length+" tế bào lớn:";
-	for (i = 0; i < LargeRects.length; i++){
-		// Special case: have to make a tempArr which have only 1 rect inside (which is LargeRects[i])
-		var DemoRects = new Array();
-		DemoRects.push({Rect:LargeRects[i],Pos:"temp"});
-		Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,null);
-		Text += "<span class=\"caption\">";
-		if(LargeRects[i]!=null){
-			Text += RectToEquation(LargeRects[i])+"</span></div>";
+	if (typeof LargeRects[0] !== "undefined"){
+		var Text = "<p class=\"header-color remove-bottom\" style=\"padding: 5px 10px !important;\"><b>Bước 1:</b> Biểu đồ Karnaugh của <i>f</i> có "+LargeRects.length+" tế bào lớn:";
+		for (i = 0; i < LargeRects.length; i++){
+			// Special case: have to make a tempArr which have only 1 rect inside (which is LargeRects[i])
+			var DemoRects = new Array();
+			DemoRects.push({Rect:LargeRects[i],Pos:"temp"});
+			Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,null);
+			Text += "<span class=\"caption\">";
+			if(LargeRects[i]!=null){
+				Text += RectToEquation(LargeRects[i])+"</span></div>";
+			}
 		}
-	}
-	Text += "</p>";
-	if (LargeRects.length > 0){
+		flagStep2 = true;
 		$("#StepByStep").show();
+	}
+	else if(!TestRect(CreateRect(0,0,KMap.Width,KMap.Height),false)){
+		var Text = "<p class=\"header-color remove-bottom\" style=\"padding: 5px 10px !important;\">";
+		Text += "<b>Bước 1:</b> Biểu đồ Karnaugh của <i>f </i> không có tế bào lớn nào mà chỉ có các tế bào đơn lẻ<br>";
+		Text += "&#8680; Dạng nối rời chính tắc cũng là công thức đa thức tối tiểu duy nhất";
+
+		flagStep2 = false;
+		$("#StepByStep").show();
+	}
+	else{
+		$("#StepByStep").hide();
 	}
 	return Text;
 }
 
 
 function GenerateStep2HTML(){
-	if (Step2Rects.length == 0){
-		var Text =  "<p><b>Bước 2:</b> Không tìm thấy bất kỳ ô nào chỉ nằm trong 1 tế bào lớn duy nhất<br>";
-		Text += "<p>&rArr; Ta tiếp tục qua bước 3";
-	}
-	else {
-		var Text =  "<p><b>Bước 2:</b> Ta có ";
-		for (var i = 0; i < Step2Rects.length; i++){
-			if (i <= Step2Rects.length-3){
-				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")" + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>, " ;
-			}
-			else if (i == Step2Rects.length-2){
-				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b> và ";
-			}
-			else {
-				Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>.<br>";
-			}
-		}
-		if(findUniqueCells().length > 0){
-			var uniquecells = findUniqueCells();
-			var addUniqueCellsRects = Step2Rects.slice(0);
-			for (var i = 0; i < uniquecells.length; i++){
-				addUniqueCellsRects.push(uniquecells[i]);
-			}
-			Text += "Ngoài ra, còn có các ô đơn lẻ (không thuộc 1 tế bào lớn nào) nằm rải rác như ô <b>("+ uniquecells[0].Pos.x+","+uniquecells[0].Pos.y+")</b>.<br>"
-			Text += "Gạch chéo các tế bào lớn cùng với các ô đơn lẻ, ta được biểu đồ Karnaugh của f như sau:</p>";
-			Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(addUniqueCellsRects,null);
-		}
-		else{
-			Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
-			Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
-		}
-
-		// Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
-		// Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
-		Text += "<span class=\"caption\">";
-		if(Step2Rects.length > 0){
-			for (var k = 0; k < Step2Rects.length; k++){
-				if (k < Step2Rects.length-1)
-					Text += RectToEquation(Step2Rects[k].Rect)+ "+";
-				else
-					Text += RectToEquation(Step2Rects[k].Rect)+"</span></div>";
-			}
-		}
-		if(flagStep3 == false){
-			Text += "<p>&rArr; Ta nhận thấy biểu đồ Karnaugh đã được phủ kín </p>";
+	var Text = "";
+	if(flagStep2 == true){
+		$("#Step_2").show();
+		if (Step2Rects.length == 0){
+			Text =  "<p><b>Bước 2:</b> Không tìm thấy bất kỳ ô nào chỉ nằm trong 1 tế bào lớn duy nhất<br>";
+			Text += "<p>&#8680; Ta tiếp tục qua bước 3";
 		}
 		else {
-			if (LeftoverCells.length == 1){
-				Text += "<p>&rArr; Còn lại ô "+ "<b>("+ LeftoverCells[0].Pos.x +","+ LeftoverCells[0].Pos.y+ ")</b>" + " chưa được phủ nên ta qua Bước 3 </p>";
+			var Text =  "<p><b>Bước 2:</b> Ta có ";
+			for (var i = 0; i < Step2Rects.length; i++){
+				if (i <= Step2Rects.length-3){
+					Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")" + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>, " ;
+				}
+				else if (i == Step2Rects.length-2){
+					Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b> và ";
+				}
+				else {
+					Text += "ô <b>"+ "("+ Step2Rects[i].Pos.x +","+ Step2Rects[i].Pos.y+ ")"  + "</b> nằm duy nhất trong tế bào lớn là <b>"+ RectToEquation(Step2Rects[i].Rect) + "</b>.<br>";
+				}
+			}
+			if(findUniqueCells().length > 0){
+				var uniquecells = findUniqueCells();
+				var addUniqueCellsRects = Step2Rects.slice(0);
+				for (var i = 0; i < uniquecells.length; i++){
+					addUniqueCellsRects.push(uniquecells[i]);
+				}
+				Text += "Ngoài ra, còn có các ô đơn lẻ (không thuộc 1 tế bào lớn nào) nằm rải rác như ô <b>("+ uniquecells[0].Pos.x+","+uniquecells[0].Pos.y+")</b>.<br>"
+				Text += "Gạch chéo các tế bào lớn cùng với các ô đơn lẻ, ta được biểu đồ Karnaugh của f như sau:</p>";
+				Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(addUniqueCellsRects,null);
+			}
+			else{
+				Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
+				Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
+			}
+
+			// Text += "Gạch chéo "+ Step2Rects.length + " tế bào này, ta được biểu đồ Karnaugh của f như sau:</p>"
+			// Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(Step2Rects,null);
+			Text += "<span class=\"caption\">";
+			if(Step2Rects.length > 0){
+				for (var k = 0; k < Step2Rects.length; k++){
+					if (k < Step2Rects.length-1)
+						Text += RectToEquation(Step2Rects[k].Rect)+ "+";
+					else
+						Text += RectToEquation(Step2Rects[k].Rect)+"</span></div>";
+				}
+			}
+			if(flagStep3 == false){
+				Text += "<p>&#8680; Ta nhận thấy biểu đồ Karnaugh đã được phủ kín </p>";
 			}
 			else {
-				Text += "<p>&rArr; Còn lại các ô: ";
-				for (var i = 0; i < LeftoverCells.length; i++){
-					if( i < LeftoverCells.length-2)
-						Text += "<b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>, ";
-					else if (i < LeftoverCells.length-1)
-						Text += "<b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b> ";
-					else 
-						Text += "và <b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>";
+				if (LeftoverCells.length == 1){
+					Text += "<p>&#8680; Còn lại ô "+ "<b>("+ LeftoverCells[0].Pos.x +","+ LeftoverCells[0].Pos.y+ ")</b>" + " chưa được phủ nên ta qua Bước 3 </p>";
 				}
-				Text += " chưa được phủ nên ta tiếp tục qua Bước 3 </p>";
-			}	
+				else {
+					Text += "<p>&#8680; Còn lại các ô: ";
+					for (var i = 0; i < LeftoverCells.length; i++){
+						if( i < LeftoverCells.length-2)
+							Text += "<b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>, ";
+						else if (i < LeftoverCells.length-1)
+							Text += "<b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b> ";
+						else 
+							Text += "và <b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>";
+					}
+					Text += " chưa được phủ nên ta tiếp tục qua Bước 3 </p>";
+				}	
+			}
 		}
+	}
+	else{
+		$("#Step_2").hide();
 	}
 	return Text;
 }
@@ -1433,7 +1449,7 @@ function GenerateStep3HTML(){
 			for(var step = 0; step < explanation.length-1; step++){
 					// If we can still add new Rect (so this is not a conclusion)=> print the step
 					if (typeof explanation[step].add !== "undefined"){
-						if (explanation[step].indent <=  maxIndent) {
+						if (explanation[step].index <=  maxIndent) {
 							Text += "<ol>";
 						    Text += "<p>";
 						    // Find the previous move on the same level of indent (same group) and say "remove it" before new move
@@ -1445,7 +1461,6 @@ function GenerateStep3HTML(){
 								temp--;
 							}
 
-							// console.log('temp hien tai',temp,'step hien tai',step,'group',explanation[step].group,'explanation[step].add',explanation[step].add);
 							if (temp >= 0 && typeof explanation[temp].add !== "undefined"){
 								Text += IndentSymbol[explanation[step].group] + " Không chọn <b><i>" + RectToEquation(explanation[temp].add) + "</i></b>, ta chọn <b><i>"+ RectToEquation(explanation[step].add) + "</i></b>: ";
 							}
@@ -1472,7 +1487,7 @@ function GenerateStep3HTML(){
 						}
 						//Look forward to see if the next step is a conclusion => if so, print the Karnaugh and step back
 						//else: check to see if the indent continue to increase, if decrease => fall back
-						if (typeof explanation[step+1].indent === "undefined"){
+						if (typeof explanation[step+1].index === "undefined"){
 							//Conclude the current Combination
 							Text += "<p>Vậy đa thức <i>f</i> = <b>";
 							//Add the compulsory Rects
@@ -1480,7 +1495,6 @@ function GenerateStep3HTML(){
 							for (var i = 0; i < explanation[step].curComb.length; i++){
 								currentCombinations.push(createRectFromGivenArray(explanation[step].curComb[i]));
 							}
-							// console.log('currentCombinations',currentCombinations);
 							for (var j = Step2Rects.length-1; j >= 0; j--){
 					    		currentCombinations.unshift(Step2Rects[j].Rect);
 					    	}	
@@ -1494,28 +1508,36 @@ function GenerateStep3HTML(){
 							Text += "</b> đã phủ kín biểu đồ Karnaugh <i>f</i> ("+ explanation[step+1].countCovered+")</ol>";
 						}
 						else {
-							if ( explanation[step].indent > explanation[step+1].indent){
-								var numberoffallback = explanation[step].indent - explanation[step+1].indent;
+							if ( explanation[step].index > explanation[step+1].index){
+								var numberoffallback = explanation[step].index - explanation[step+1].index;
 								for(var i = 0; i < numberoffallback-1; i++){
 									Text += "</ol>";
 								}
 							}
 						}
 					}
-					else {
-						// This is a conclusion so that We cannot add any new Rect 
+					else if (typeof explanation[step].isCovered !== "undefined"){
+						// This is a conclusion
 						// if there's no rect left to add => step back
 						// else, there're rect to add => continue
-						if(typeof explanation[step+1].add === "undefined")
-							Text+= "</ol>";
-						continue;
+						if(explanation[step+1].add !== "undefined"){
+							continue;
+						}
+						else
+							Text += "</ol>";
 					}
-
+					else {
+						// This is max indent => we cannot add any new Rect => step back
+						Text += "</ol>";
+					}
 				}
 				Text += "</div>";
 			}// to many step to show
 			else{
-				Text += "Do sơ đồ theo hình nhánh cây của số cách chọn có tới "+ totalnodes + " nút nên không hiển thị toàn bộ.</p>";
+				Text += "<br>* Trong số các ô còn lại, ta chọn 1 ô bất kỳ.<br>";
+				Text += "* Ta chọn tùy ý 1 tế bào lớn trong các tế bào chứa ô này để thêm vào phép phủ.<br>";
+				Text += "* Tiếp tục như vậy cho đến khi phủ kín biểu đồ Karnaugh của <i>f</i>.<br>";
+				Text += "&#8680; Do số bước chọn lên tới "+ totalnodes + " bước nên không hiển thị toàn bộ.</p>";
 			}
 		}
 	}
@@ -1526,7 +1548,7 @@ function GenerateStep3HTML(){
 }
 
 function GenerateStep4HTML(){
-	var Text =  "<p><b>Bước 4: </b>Ta được tất cả các phép phủ tương ứng với các công thức đa thức dưới đây:<br>";
+	var Text =  "<p><b>Bước 4: </b>Ta được tất cả <b>"+ (Step4Equations.length) +"</b> phép phủ tương ứng với các công thức đa thức dưới đây:<br>";
 	for (var i = 0; i < Step4Equations.length; i++){
 		Text+= "&nbsp;&nbsp;&nbsp;&nbsp;"+ FunctionText + " ("+ (i+1) +") <b>" + " = ";
 		for (var j = 0; j < Step4Equations[i].length; j++){
@@ -1545,7 +1567,7 @@ function GenerateStep4HTML(){
 	else if (Step4Equations.length == 2){
 		if(combWeight(Step4Equations[0]) == combWeight(Step4Equations[1])){
 			Text += "Cả hai công thức này đều đơn giản như nhau nên ta được 2 công thức đa thức tối tiểu:<br>";
-			Text += "<p>&rArr; "+ FunctionText + " = <b>";
+			Text += "&#8680; "+ FunctionText + " = <b>";
 			for (var i = 0; i < Step4Equations.length; i++){
 				for (var j = 0; j < Step4Equations[i].length; j++){
 					if(j < Step4Equations[i].length-1){
@@ -1563,7 +1585,7 @@ function GenerateStep4HTML(){
 		else if(combWeight(Step4Equations[0]) != combWeight(Step4Equations[1])){
 			var minimal = (combWeight(Step4Equations[0]) < combWeight(Step4Equations[1]))?0:1 ;
 			Text += "Ta có hai công thức đa thức tương ứng nhưng chỉ có công thức ("+ (minimal+1) +") là tối tiểu<br>";
-			Text += "<p>&rArr; "+ FunctionText + " = <b>";
+			Text += "&#8680; "+ FunctionText + " = <b>";
 
 			for (var j = 0; j < Step4Equations[minimal].length; j++){
 				if(j < Step4Equations[minimal].length-1){
@@ -1575,11 +1597,11 @@ function GenerateStep4HTML(){
 			}
 		}
 	}
-	else{
+	else if (typeof LargeRects[0] !== "undefined"){
 		// If there more than 2 combinations => find the minimal ones and conclude
 		var minimalCombIndexes = new Array();
 		var minElement = Step4Equations[0].length;
-		//find Equation that has the least term
+		//find Equation that has the minimum number of terms and add to subArray
 		for (var i = 1; i < Step4Equations.length; i++){
 			if(Step4Equations[i].length < minElement){
 				minElement = Step4Equations[i].length;
@@ -1592,6 +1614,8 @@ function GenerateStep4HTML(){
 				subArray.push({Rect: Step4Equations[i],Index: i});
 			}
 		}
+
+		// in the subArray, find the one that have larger element terms => add to minimalCombIndexes
 		var maxWeight = combWeight(subArray[0].Rect);
 		for (var i = 0; i < subArray.length; i++){
 			if(combWeight(subArray[i].Rect) > maxWeight){
@@ -1606,8 +1630,8 @@ function GenerateStep4HTML(){
 		}
 		// If all of them is equal 
 		if (minimalCombIndexes.length == Step4Equations.length){
-			Text += "Nhận thấy tất cả công thức này đều đơn giản như nhau nên ta được tập hợp các công thức đa thức tối tiểu:<br>";
-			Text += "<p>&rArr; "+ FunctionText + " = <b>";
+			Text += "Nhận thấy tất cả công thức này đều đơn giản như nhau nên ta được các công thức đa thức tối tiểu của <i>f</i> :<br>";
+			Text += "<p>&#8680; "+ FunctionText + " = <b>";
 			for (var i = 0; i < Step4Equations.length; i++){
 				for (var j = 0; j < Step4Equations[i].length; j++){
 					if(j < Step4Equations[i].length-1){
@@ -1635,9 +1659,10 @@ function GenerateStep4HTML(){
 						Text += "và công thức ("+ (minimalCombIndexes[i]+1)+") ";
 				}
 			}
-			Text += "đơn giản hơn các công thức khác nên ta kết luận tập hợp các công thức đa thức tối tiểu:<br>";
+			Text += "đơn giản hơn các công thức khác.<br>";
+			Text += "Ta kết luận các công thức đa thức tối tiểu của <i>f</i> :<br>";
 			
-			Text += "<p>&rArr; "+ FunctionText + " = <b>";
+			Text += "<p>&#8680; "+ FunctionText + " = <b>";
 			for (var i = 0; i < minimalCombIndexes.length; i++){
 				var minimal = minimalCombIndexes[i];
 				for (var j = 0; j < Step4Equations[minimal].length; j++){
@@ -1667,6 +1692,7 @@ function ChangeVariableNumber( Num )
 	GetElement("TwoVariableRB").checked   = (Num==2)?true:false;
 	GetElement("ThreeVariableRB").checked = (Num==3)?true:false;
 	GetElement("FourVariableRB").checked  = (Num==4)?true:false;
+	UpdateUI();
 	Search();
 	UpdateUI();
 }
@@ -1730,5 +1756,3 @@ document.getElementById('variablenames').addEventListener('change', function() {
 		}
 	}
 });
-
-
