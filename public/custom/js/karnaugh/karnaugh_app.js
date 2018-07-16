@@ -26,7 +26,6 @@ var flagStep3 = false;							// Flag to see if the rects in step 2 coverted all 
 var LeftoverCells = new Array();				// the cells that isCovered = false after using Step2Rects to cover the Kmap
 var explanation = new Array();					// record structure for each iterations in Step3's finding all possible combinations
 var Step4Equations = new Array();				// Expressions of S.O.P in Step4
-
 var totalnodes = 0;								// total of steps in expalnation
 var countCovered = 0;							// number of found expressions that covered the Kmap
 for (i=0; i<Math.pow(2,MaxVariableCount); i++)
@@ -359,7 +358,7 @@ function FindBestCoverage(Rects2x1,AllRects)
     }
     
     
-    // seed the weight map with 1 for every square covered by every Rect (all the large rects)
+    // seed the weight map with 1 for every square covered by every the large rects
     var i = 0;
     for (i = 0; i < LargeRects.length; i++)
     {
@@ -384,16 +383,17 @@ function FindBestCoverage(Rects2x1,AllRects)
     }
     Step2Rects = step2_tempRects.slice(0); //clone from step2_tempRects to global scope Step2Rects
 
-    console.log('Step2Rects',Step2Rects);
     // If none 1-weight cell to be found => Sort the array by weight and find the Minimal S.O.P
     if(LargeRects.length > 0 && Step2Rects.length == 0){
     	var Step2_Combination = new Array();
-    	Step2_Combination.push(sortRectsByWeight(Rects2x1));
-    	console.log('Vo day 1',Step2_Combination);
+    	// Step2_Combination.push(sortRectsByWeight(Rects2x1));
+    	flagStep3 = true;
+    	LeftoverCells = findLeftoverCells(Weights);
+    	var Step2_Combination = determinePossibleCombs(LeftoverCells);
 	    return Step2_Combination;
     }
-    else { 
-    	//If there are 1-weight cells to be covered
+    else{ 
+    	//If there are 1-weight cells to be covered => Step2Rects is valid
     	//Step 3 - if the minimal Rects found in Step 2 cannot covered the KMap, pick randomly an uncovered cell to continue with Step 3
 	    //if the Kmap is Convered, jump to Step 4
 	    if (isKMapCoveredBy(Weights,Step2Rects) == false){
@@ -402,15 +402,23 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    	//Every leftover cell will store:
 			// 1) the position (.Pos)
 			// 2) Rects that is covering the leftover cell (more than 2 because leftover cells are not 1-weight cell) (.Rects)
-	    	var Step3_Combinations = (determinePossibleCombs(LeftoverCells)).slice(0);
+	    	var Step3_Combinations = determinePossibleCombs(LeftoverCells);
+
+
 	    	// Add the Step2_Rects to Step3 combination
 	    	for (var i = 0; i < Step3_Combinations.length; i++){
 	    		// Because unshift append to the left => we append from last to top
 	    		for (var j = Step2Rects.length-1; j >= 0; j--){
 	    			Step3_Combinations[i].unshift(Step2Rects[j].Rect);
-	    		}	
+	    		}
+	    		// If there is any unique cells => add it to the solution
+	    		if (findUniqueCells().length > 0){
+	    			var uniquecells = findUniqueCells();
+	    			for (var k = 0; k < uniquecells.length; k++){
+	    				Step3_Combinations[i].push(uniquecells[k].Rect);
+	    			}
+	    		}
 	    	}
-	    	console.log('Vo day 2');
 	    	return Step3_Combinations;
 	    }
 	    else {
@@ -422,10 +430,9 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    		Combination.push(Step2Rects[i].Rect);
 	    	}
 	    	Step2_Combination.push(Combination);
-	    	console.log('Vo day 3');
 	    	return Step2_Combination;
 	    }
-    }    
+    }
 }
 
 	
@@ -453,14 +460,16 @@ function Search()
     // Collect all the larger rectangles (Step 1 - Explanation)
     LargeRects = Rects.concat(Rects2x1);
 
-    //Special cases: have to add the special Rect (3,3,2,2) even if it's covered by others rects (other rects must be more than 2)
+    //Special cases: have to add the special Rects (3,3,2,2) and (1,1,2,2) even if it's covered by others rects (other rects must be more than 2)
     //so that we can find better coverage in Step3 iteration with that special Rect (3,3,2,2)
     if(TestRect(CreateRect(3,3,2,2),true) && IsRectDuplicateIn(CreateRect(3,3,2,2),LargeRects) == false && LargeRects.length >= 2){
     	LargeRects.push(CreateRect(3,3,2,2));
     }
-
+    if(TestRect(CreateRect(1,1,2,2),true) && IsRectDuplicateIn(CreateRect(1,1,2,2),LargeRects) == false && LargeRects.length >= 2){
+    	LargeRects.push(CreateRect(1,1,2,2));
+    }
     // FindBestCoverage(Rects2x1, Rects);
-    var BestCoverage = FindBestCoverage(Rects2x1, Rects);
+    var BestCoverage = FindBestCoverage(Rects2x1, LargeRects);
 
     //Cut all the BestCoverage to global scope Step4Equations for manipulating
     Step4Equations = BestCoverage.splice(0);
@@ -1346,7 +1355,7 @@ function GenerateStep2HTML(){
 		$("#Step_2").show();
 		if (Step2Rects.length == 0){
 			Text =  "<p><b>Bước 2:</b> Không tìm thấy bất kỳ ô nào chỉ nằm trong 1 tế bào lớn duy nhất<br>";
-			Text += "<p>&#8680; Ta tiếp tục qua bước 3";
+			Text += "<p>&#8680; Không có các tế bào bắt buộc, ta tiếp tục qua bước 3";
 		}
 		else {
 			var Text =  "<p><b>Bước 2:</b> Ta có ";
@@ -1405,6 +1414,7 @@ function GenerateStep2HTML(){
 							Text += "và <b>("+ LeftoverCells[i].Pos.x +","+ LeftoverCells[i].Pos.y+ ")</b>";
 					}
 					Text += " chưa được phủ nên ta tiếp tục qua Bước 3 </p>";
+					flagStep3 = true;
 				}	
 			}
 		}
@@ -1438,6 +1448,12 @@ function GenerateStep3HTML(){
 				for (var k = 0; k < LeftoverCells[0].Rects.length; k++){
 					DemoRects.push({Rect:LeftoverCells[0].Rects[k],Pos:"temp"});
 				}
+				if (findUniqueCells().length > 0){
+					var uniquecells = findUniqueCells();
+					for (let i = 0; i < uniquecells.length; i++){
+						DemoRects.push(uniquecells[i]);
+					}
+				}
 
 				Text += "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,LeftoverCells[0].Rects[i],'rgb(255, 255, 102)');
 				Text += "<span class=\"caption\">";
@@ -1446,105 +1462,105 @@ function GenerateStep3HTML(){
 			}
 			Text += "</p>";
 		}
-	else{
-		if(totalnodes <= 50){
-			Text += "Ta có sơ đồ cách chọn các tế bào lớn còn lại để phủ kín biểu đồ Karnaugh <i>f </i>   theo các nhánh của hình cây:<br><div>";
-			var maxIndent = LargeRects.length - Step2Rects.length-1;
-			for(var step = 0; step < explanation.length-1; step++){
-					// If we can still add new Rect (so this is not a conclusion)=> print the step
-					if (typeof explanation[step].add !== "undefined"){
-						if (explanation[step].index <=  maxIndent) {
-							Text += "<ol>";
-						    Text += "<p>";
-						    // Find the previous move on the same level of indent (same group) and say "remove it" before new move
-							var temp = step-1;
-							while(temp >= 0){
-								if (explanation[temp].group == explanation[step].group){
-									break;
+		else{
+			if(totalnodes <= 50){
+				Text += "Ta có sơ đồ cách chọn các tế bào lớn còn lại để phủ kín biểu đồ Karnaugh <i>f </i>   theo các nhánh của hình cây:<br><div>";
+				var maxIndent = LargeRects.length - Step2Rects.length-1;
+				for(var step = 0; step < explanation.length-1; step++){
+						// If we can still add new Rect (so this is not a conclusion)=> print the step
+						if (typeof explanation[step].add !== "undefined"){
+							if (explanation[step].index <=  maxIndent) {
+								Text += "<ol>";
+							    Text += "<p>";
+							    // Find the previous move on the same level of indent (same group) and say "remove it" before new move
+								var temp = step-1;
+								while(temp >= 0){
+									if (explanation[temp].group == explanation[step].group){
+										break;
+									}
+									temp--;
 								}
-								temp--;
-							}
 
-							if (temp >= 0 && typeof explanation[temp].add !== "undefined"){
-								Text += IndentSymbol[explanation[step].group] + " Không chọn <b><i>" + RectToEquation(explanation[temp].add) + "</i></b>, ta chọn <b><i>"+ RectToEquation(explanation[step].add) + "</i></b>: ";
+								if (temp >= 0 && typeof explanation[temp].add !== "undefined"){
+									Text += IndentSymbol[explanation[step].group] + " Không chọn <b><i>" + RectToEquation(explanation[temp].add) + "</i></b>, ta chọn <b><i>"+ RectToEquation(explanation[step].add) + "</i></b>: ";
+								}
+								else 
+									Text += IndentSymbol[explanation[step].group] + " Ta chọn <b><i>" + RectToEquation(explanation[step].add) + "</i></b>: "
+							    
+							    if (leftOveredCellsByComb(explanation[step].curComb) == 0)
+							    	Text += "<br>&#8680; Tất cả các ô đã được phủ kín </p>";
+							    else
+							    	Text += "<br> Còn lại <b>"+ leftOveredCellsByComb(explanation[step].curComb) +"</b> ô chưa phủ </p>";
+							    //Show the current KMap stepbystep
+							    var DemoRects = new Array();
+							    DemoRects = Step2Rects.slice(0);
+							    for (var i = 0; i < explanation[step].curComb.length; i++){
+							    	DemoRects.push({Rect:createRectFromGivenArray(explanation[step].curComb[i]),Pos:"temp"});
+							    }
+							    Text +=  "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,createRectFromGivenArray( explanation[step].add),'rgb(255, 255, 102)');
+							    Text += "<span class=\"caption\">";
+								Text += "+ <b>"+ RectToEquation(explanation[step].add)+"</b></span></div>";
 							}
-							else 
-								Text += IndentSymbol[explanation[step].group] + " Ta chọn <b><i>" + RectToEquation(explanation[step].add) + "</i></b>: "
-						    
-						    if (leftOveredCellsByComb(explanation[step].curComb) == 0)
-						    	Text += "<br>&#8680; Tất cả các ô đã được phủ kín </p>";
-						    else
-						    	Text += "<br> Còn lại <b>"+ leftOveredCellsByComb(explanation[step].curComb) +"</b> ô chưa phủ </p>";
-						    //Show the current KMap stepbystep
-						    var DemoRects = new Array();
-						    DemoRects = Step2Rects.slice(0);
-						    for (var i = 0; i < explanation[step].curComb.length; i++){
-						    	DemoRects.push({Rect:createRectFromGivenArray(explanation[step].curComb[i]),Pos:"temp"});
-						    }
-						    Text +=  "<div class=\"SmallKMaps\">" + GenerateKMapHTMLfrom(DemoRects,createRectFromGivenArray( explanation[step].add),'rgb(255, 255, 102)');
-						    Text += "<span class=\"caption\">";
-							Text += "+ <b>"+ RectToEquation(explanation[step].add)+"</b></span></div>";
-						}
-						else {
-							Text += "</ol>";
-							continue;
-						}
-						//Look forward to see if the next step is a conclusion => if so, print the Karnaugh and step back
-						//else: check to see if the indent continue to increase, if decrease => fall back
-						if (typeof explanation[step+1].index === "undefined"){
-							//Conclude the current Combination
-							Text += "<p>Vậy đa thức <i>f</i> = <b>";
-							//Add the compulsory Rects
-							var currentCombinations = new Array();
-							for (var i = 0; i < explanation[step].curComb.length; i++){
-								currentCombinations.push(createRectFromGivenArray(explanation[step].curComb[i]));
+							else {
+								Text += "</ol>";
+								continue;
 							}
-							for (var j = Step2Rects.length-1; j >= 0; j--){
-					    		currentCombinations.unshift(Step2Rects[j].Rect);
-					    	}	
-					    	//Output the current combination 
-							for (var i = 0; i< currentCombinations.length; i++){
-								Text += RectToEquation(currentCombinations[i]);
-								if (i < currentCombinations.length-1){
-									Text += " + ";
+							//Look forward to see if the next step is a conclusion => if so, print the Karnaugh and step back
+							//else: check to see if the indent continue to increase, if decrease => fall back
+							if (typeof explanation[step+1].index === "undefined"){
+								//Conclude the current Combination
+								Text += "<p>Vậy đa thức <i>f</i> = <b>";
+								//Add the compulsory Rects
+								var currentCombinations = new Array();
+								for (var i = 0; i < explanation[step].curComb.length; i++){
+									currentCombinations.push(createRectFromGivenArray(explanation[step].curComb[i]));
+								}
+								for (var j = Step2Rects.length-1; j >= 0; j--){
+						    		currentCombinations.unshift(Step2Rects[j].Rect);
+						    	}	
+						    	//Output the current combination 
+								for (var i = 0; i< currentCombinations.length; i++){
+									Text += RectToEquation(currentCombinations[i]);
+									if (i < currentCombinations.length-1){
+										Text += " + ";
+									}
+								}
+								Text += "</b> đã phủ kín biểu đồ Karnaugh <i>f</i> ("+ explanation[step+1].countCovered+")</ol>";
+							}
+							else {
+								if ( explanation[step].index > explanation[step+1].index){
+									var numberoffallback = explanation[step].index - explanation[step+1].index;
+									for(var i = 0; i < numberoffallback-1; i++){
+										Text += "</ol>";
+									}
 								}
 							}
-							Text += "</b> đã phủ kín biểu đồ Karnaugh <i>f</i> ("+ explanation[step+1].countCovered+")</ol>";
+						}
+						else if (typeof explanation[step].isCovered !== "undefined"){
+							// This is a conclusion
+							// if there's no rect left to add => step back
+							// else, there're rect to add => continue
+							if(explanation[step+1].add !== "undefined"){
+								continue;
+							}
+							else
+								Text += "</ol>";
 						}
 						else {
-							if ( explanation[step].index > explanation[step+1].index){
-								var numberoffallback = explanation[step].index - explanation[step+1].index;
-								for(var i = 0; i < numberoffallback-1; i++){
-									Text += "</ol>";
-								}
-							}
-						}
-					}
-					else if (typeof explanation[step].isCovered !== "undefined"){
-						// This is a conclusion
-						// if there's no rect left to add => step back
-						// else, there're rect to add => continue
-						if(explanation[step+1].add !== "undefined"){
-							continue;
-						}
-						else
+							// This is max indent => we cannot add any new Rect => step back
 							Text += "</ol>";
+						}
 					}
-					else {
-						// This is max indent => we cannot add any new Rect => step back
-						Text += "</ol>";
-					}
+					Text += "</div>";
+				}// to many step to show
+				else{
+					Text += "<br>* Trong số các ô còn lại, ta xét 1 ô bất kỳ.<br>";
+					Text += "* Ta chọn tùy ý 1 tế bào lớn trong các tế bào chứa ô này để thêm vào phép phủ.<br>";
+					Text += "* Tiếp tục như vậy cho đến khi phủ kín biểu đồ Karnaugh của <i>f</i>.<br>";
+					Text += "&#8680; Do số bước chọn lên tới "+ totalnodes + " bước nên không hiển thị toàn bộ.</p>";
 				}
-				Text += "</div>";
-			}// to many step to show
-			else{
-				Text += "<br>* Trong số các ô còn lại, ta chọn 1 ô bất kỳ.<br>";
-				Text += "* Ta chọn tùy ý 1 tế bào lớn trong các tế bào chứa ô này để thêm vào phép phủ.<br>";
-				Text += "* Tiếp tục như vậy cho đến khi phủ kín biểu đồ Karnaugh của <i>f</i>.<br>";
-				Text += "&#8680; Do số bước chọn lên tới "+ totalnodes + " bước nên không hiển thị toàn bộ.</p>";
 			}
 		}
-	}
 	else{
 		$("#Step_3").hide();
 	}
