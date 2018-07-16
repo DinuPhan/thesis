@@ -31,7 +31,8 @@ tbody .top-bordered:not(:first-child){
 }
 
 .half-bottom {
-    margin-bottom: 10px !important
+    margin-bottom: 10px !important;
+    margin-right: 5% !important;
 }
 
 .add-bottom {
@@ -75,7 +76,7 @@ input[type="password"].half-width,
 input[type="email"].half-width,
 textarea.half-width,
 select.half-width {
-    width: 50%;
+    width: 78%;
     text-align: center;
 
 }
@@ -368,6 +369,22 @@ ol.b {
 }
 
 
-.essential-implicant{
-    background-color: #146f8d;
+.essential-implicant0{
+    background-color: #00C2F4;
+}
+
+.essential-implicant1{
+    background-color: #00D9DD;
+}
+
+.essential-implicant2{
+    background-color: #2BEAB4;
+}
+
+.essential-implicant3{
+    background-color: #6dea6f;
+}
+
+.essential-implicant4{
+    background-color: #F9F871;
 }

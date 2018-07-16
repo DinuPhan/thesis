@@ -3,7 +3,11 @@
 function readInput() {
     //get input as a string
     var minTermsString = document.getElementById("Minterms").value;
-
+    // var DNFString = document.getElementById("DNFequations").value;
+    // console.log('DNFString',DNFString);
+    // if (DNFString.length > 0){
+    //     var 
+    // }
     //filter input and place it in an array of numbers
     minTerms = filterInput(minTermsString);
 }
@@ -18,6 +22,7 @@ function printError() {
 //takes a string of comma spearated numbers and returns an array of the numbers
 function filterInput(str) {
     if (str.length > 0) {
+        // console.log('Number',Number);
         return str.split(',').map(Number);
     }
     //return an empty array if string length is zero

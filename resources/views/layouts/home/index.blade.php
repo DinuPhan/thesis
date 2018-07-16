@@ -19,7 +19,7 @@
 					Nếu bạn muốn tìm hiểu thêm về các thao tác với giao diện, hãy xem video dưới đây:
 				</p>
 				<div style="text-align:center;">
-					<iframe width="420" height="315" src="https://www.youtube.com/embed/tgbNymZ7vqY"></iframe>
+					<iframe width="420" height="315" src="https://www.youtube.com/embed/WDZPmg7mNH8"></iframe>
 				</div>
 			</div>
 		</div>

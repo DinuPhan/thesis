@@ -384,10 +384,12 @@ function FindBestCoverage(Rects2x1,AllRects)
     }
     Step2Rects = step2_tempRects.slice(0); //clone from step2_tempRects to global scope Step2Rects
 
+    console.log('Step2Rects',Step2Rects);
     // If none 1-weight cell to be found => Sort the array by weight and find the Minimal S.O.P
     if(LargeRects.length > 0 && Step2Rects.length == 0){
     	var Step2_Combination = new Array();
     	Step2_Combination.push(sortRectsByWeight(Rects2x1));
+    	console.log('Vo day 1',Step2_Combination);
 	    return Step2_Combination;
     }
     else { 
@@ -408,6 +410,7 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    			Step3_Combinations[i].unshift(Step2Rects[j].Rect);
 	    		}	
 	    	}
+	    	console.log('Vo day 2');
 	    	return Step3_Combinations;
 	    }
 	    else {
@@ -419,6 +422,7 @@ function FindBestCoverage(Rects2x1,AllRects)
 	    		Combination.push(Step2Rects[i].Rect);
 	    	}
 	    	Step2_Combination.push(Combination);
+	    	console.log('Vo day 3');
 	    	return Step2_Combination;
 	    }
     }    

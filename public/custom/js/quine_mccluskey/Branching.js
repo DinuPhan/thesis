@@ -7,18 +7,13 @@
 //by the end of the branching process, we should have an array minimalSolutions which contains arrays
 //of the minimal implicants needed to cover remaining minterms
 
-var minimalSolutions;
+// var minimalSolutions;
 
 function branchingProcess() {
-
-    implicantsPowerSet = powerSet(remainingImplicants);
-    var validSolutions = filterPowerSet(implicantsPowerSet); //array contains valid cominations
-    minimalSolutions = filterPossibleSolutions(validSolutions); //array contains valid combainations with least cost
-
-    // //test
-    // for (var i = 0; i < minimalSolutions.length; i++) {
-    //     console.log(printImplicantArray("MinimalSolution: ", minimalSolutions[i]));
-    // }
+    var implicantsPowerSet = powerSet(remainingImplicants);
+    validSolutions = filterPowerSet(implicantsPowerSet); //array contains valid cominations
+    var currentValidSolutions = validSolutions.slice();
+    minimalSolutions = filterPossibleSolutions(currentValidSolutions); //array contains valid combainations with least cost
 }
 
 

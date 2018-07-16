@@ -49,7 +49,7 @@ function checkEssentialImplicants() {
 		if (termsCoverCount[uncoveredMinTerms[i]] == 1) {
 			for (var j=0; j<remainingImplicants.length; j++) {
 				var primeImplicantMinterms = remainingImplicants[j].mintermsCovered;
-				if (primeImplicantMinterms.includes(uncoveredMinTerms[i])){
+				if (primeImplicantMinterms.includes(uncoveredMinTerms[i]) && !currentEssentialImplicants.includes(remainingImplicants[j])){
 					currentEssentialImplicants.push(remainingImplicants[j]);
 					currentUniqueMinTermsPositions.push(primeImplicantMinterms.indexOf(uncoveredMinTerms[i]));
 				}
@@ -85,6 +85,10 @@ function checkEssentialImplicants() {
 					var tempremainingImplicants = remainingImplicants.slice();
 					essentialImplicantFound = true;
 					eliminationRecords.push({code:"EI",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, removedImplicant: tempremoveImplicant, essentialImplicants: currentEssentialImplicants, uniqueMinTermsPositions: currentUniqueMinTermsPositions});
+					checkRowDominance(tempremainingImplicants,tempuncoveredMinTerms);
+					checkRowDominance(tempremainingImplicants,tempuncoveredMinTerms);
+					remainingImplicants = tempremainingImplicants.slice();
+					uncoveredMinterms = tempuncoveredMinTerms.slice();
 				}
 			}
 		}
@@ -95,20 +99,20 @@ function checkEssentialImplicants() {
 
 
 //compares every two rows to check for row dominance
-function checkRowDominance() {
+function checkRowDominance(givenImplicants, givenMinTerms) {
 	//var rowDominanceFound = false;
 
-	for (var i=0; i<remainingImplicants.length; i++) {
-		for (var j=0; j<remainingImplicants.length; j++) {
+	for (var i=0; i<givenImplicants.length; i++) {
+		for (var j=0; j<givenImplicants.length; j++) {
 			if (i==j) continue;
 
 			//if dominance found, remove the dominated row
-			if (rowDominates(remainingImplicants[i], remainingImplicants[j])) {
-				var dominatedRow = remainingImplicants[j];	
-				remainingImplicants.splice(j,1);
-				var tempremainingImplicants = remainingImplicants.slice();
-				var tempuncoveredMinTerms = remainingImplicants.slice();
-				// eliminationRecords.push({code:"RD",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, dominatedRow: dominatedRow});
+			if (rowDominates(givenImplicants[i], givenImplicants[j])) {
+				var dominatedRow = givenImplicants[j];	
+				givenImplicants.splice(j,1);
+				var tempremainingImplicants = givenImplicants.slice();
+				var tempuncoveredMinTerms = givenMinTerms.slice();
+				eliminationRecords.push({code:"RD",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, dominatedRow: dominatedRow});
 				return true;
 				//rowDominanceFound = true;
 			}
@@ -152,20 +156,20 @@ function rowDominates(imp1, imp2) {
 }
 
 //compares every two columns to check for column dominance
-function checkColumnDominance() {
+function checkColumnDominance(givenImplicants, givenMinTerms) {
 	//var columnDominanceFound = false;
 
-	for (var i=0; i<uncoveredMinTerms.length; i++) {
-		for (var j=0; j<uncoveredMinTerms.length; j++) {
+	for (var i=0; i<givenMinTerms.length; i++) {
+		for (var j=0; j<givenMinTerms.length; j++) {
 			if (i==j) continue;
 
-			//if dominance found, remove the dominated column
-			if (columnDominates(uncoveredMinTerms[i], uncoveredMinTerms[j])) {
-				var dominatedColumn = uncoveredMinTerms[j];
-				uncoveredMinTerms.splice(j,1);
-				var tempuncoveredMinTerms = uncoveredMinTerms.slice();
-				var tempremainingImplicants = remainingImplicants.slice();
-				// eliminationRecords.push({code:"CD",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, dominatedColumn: dominatedColumn});
+			//if dominance found, remove the dominating column
+			if (columnDominates(givenMinTerms[i], givenMinTerms[j])) {
+				var dominatingColumn = givenMinTerms[j];
+				givenMinTerms.splice(i,1);
+				var tempuncoveredMinTerms = givenMinTerms.slice();
+				var tempremainingImplicants = givenImplicants.slice();
+				eliminationRecords.push({code:"CD",uncoveredMinterms: tempuncoveredMinTerms, remainingImplicants: tempremainingImplicants, dominatingColumn: dominatingColumn});
 				return true;
 				//columnDominanceFound = true;
 			}

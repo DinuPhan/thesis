@@ -12,8 +12,8 @@ var specialcase;
 var remainingImplicants;
 var uncoveredMinTerms;
 var eliminationRecords;
-// var essentialImplicants;
-// var uniqueMinTermsPositions;
+var validSolutions;
+var minimalSolutions;
 
 function main() {
 
@@ -26,8 +26,6 @@ function main() {
     solutions = [];
     solutionsExpressions = [];
     eliminationRecords = new Array();
-    // essentialImplicants = new Array();
-    // uniqueMinTermsPositions = new Array();
     //Part 0
     readInput(); //put them in Array minTerms & dontCares
 
