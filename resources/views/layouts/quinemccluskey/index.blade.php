@@ -30,15 +30,7 @@
                             </small>
                         </p>  
                     </div> 
-                    
-                   {{--  <div id="TruthTable">
-                         <div class="eight columns add-bottom pull-left" style="display: block">    
-                            <p class="pull-center"><b>Bảng chân trị</b></p>
-                            <div id="TruthTableDiv">
-                            </div>     
-                        </div>
-                    </div>
- --}}               
+                   
                     <div class = "eight columns add-bottom pull-left">
                          <input id="clickSimplify" type="button" class="button" value="Xử lý" onClick="main();" />
                     </div>       

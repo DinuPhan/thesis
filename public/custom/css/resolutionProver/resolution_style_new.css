@@ -1,0 +1,142 @@
+#leftColumn {
+    border: 3px solid #3eb8db;
+    box-shadow: 0 0 0 3px #3eb8db;
+    background-color: transparent;
+    color: #13a7f3 !important;
+    margin-bottom: 20px;
+}
+
+#rightColumn {
+    border: 3px solid black;
+    padding-top: 10px;
+    border: 3px solid #3eb8db;
+    box-shadow: 0 0 0 3px #3eb8db;
+    background-color: transparent;
+    margin-bottom: 20px;
+}
+
+.different td, .different tr {
+    padding-top: 5px;
+    float: none !important;
+    display: inline;    
+}
+
+.different td input, .different tr input{
+    width: 100%
+}
+
+#inputForm1 {
+    border: 1;
+    width: 100%;
+    float: none !important;
+    margin-top: 10px;
+}
+
+#tableauContainer {
+    box-shadow: 0 0 0 3px #3eb8db;
+    width: 100%;
+    min-height: 300px;
+    overflow-x: auto;
+    margin-left: 0px;
+    margin-bottom: 20px;
+    border: 3px solid #3eb8db;
+    background-color: white;
+}
+
+#premiseAddButton, #resPremiseAddButton,
+#conclAddButton, #resConclAddButton {
+    background: #1baaf3;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+    -webkit-border-bottom-right-radius: 3px;
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+    -webkit-border-top-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+    -moz-background-clip: padding;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    color: #ffffff;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    line-height: normal;
+    padding: 10px 15px;
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    border: none;
+    padding-top: 5px;
+    float: right;
+}
+
+.otherDiff, #resultLine {
+    text-align: center;
+    color: #13a7f3 !important;
+}
+
+#masterResTable {
+    border-collapse: collapse;
+    margin: auto !important;
+    overflow-x: auto;
+    
+}
+
+#resTable, #masterTable {
+    text-align: center !important;
+    margin: auto !important;
+}
+
+#noteTable{
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-align: center;
+}
+
+#resTable td, #resTable tr {
+    margin: auto;
+}
+
+/* ToolTip classses */ 
+.tooltip {
+    position: relative;
+    display: inline-block;    
+}
+.tooltip .tooltiptext {
+    margin-left:9px;
+    width : 320px;
+    visibility: hidden;
+    background-color: #FFF;
+    border-radius:4px;
+    border: 1px solid #aeaeae;
+    position: absolute;
+    z-index: 1;
+    padding: 5px;
+    margin-top : -15px; /* according to application */ 
+    opacity: 0;
+    transition: opacity 1s;
+}
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 5%;
+    right: 100%; /* To the left of the tooltip */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #aeaeae transparent transparent;
+}
+
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+

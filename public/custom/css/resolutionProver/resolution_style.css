@@ -1,0 +1,390 @@
+body {
+    background-color: #222930 !important;
+}
+#createdBy {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    font-size: medium;
+    z-index: 2;
+}
+#gitLink {
+    position: relative;
+    top: 5px;
+    float:right;
+    font-size: medium;
+    z-index: 2;
+}
+
+.diff {
+    color: black !important;
+    font-size: 20px;
+}
+#tableHeader {
+    margin: 5px;
+}
+
+.different {
+    float: none !important; 
+}
+
+
+
+#operatorTable td, #A-Rules-Table td {
+    width:180px;  
+}
+#exampleTable, #B-Rules-Table, #CNFExamples {
+    font-size: 18px;
+    margin: auto;
+    margin-bottom: 10px;
+}
+#exampleTable tr, #B-Rules-Table tr {border-bottom: solid 1px;}
+#operatorTable, #A-Rules-Table, #CNFExamples {margin: auto; font-size: 18px;}
+
+.ModalTable th {
+    text-align: center;
+}
+#ExampleList th, #ExampleList td {
+    color: #E9E9E9;
+}
+#ExampleList tr {
+    border-bottom-color: #E9E9E9;
+}
+
+#RuleTH {
+    vertical-align: bottom
+}
+
+.ModalTable {
+    width: auto;
+    font-size: 18px;
+    margin: 25px;
+}
+
+#operatorTable tr, .ModalTable tr, #A-Rules-Table tr, #CNFExamples tr {
+    border-bottom: solid 1px;
+    border-collapse: collapse;
+}
+
+#polishHeader::first-letter { 
+}
+.r {text-align: right !important;}
+.r2 {text-align: right !important; width: 60%;}
+#operatorTable td, #exampleTable td, #A-Rules-Table td, #B-Rules-Table td {
+    text-align: left;
+}
+
+.different td, .different tr {
+    float: none !important;
+    display: inline;    
+}
+
+.otherDiff{
+    color:black!important;
+}
+
+#premiseTable, #conclusionTable {
+}
+
+#premiseTable div, #conclusionTable div {
+}
+
+p {
+    font-size: large;
+}
+
+#ModalInfoCol p {
+    font-size: large;
+}
+
+.container {
+    margin: auto;
+}
+
+#tableauContainer {
+    box-shadow: 0 0 0 3px black;
+    width: 100%;
+    min-height: 220px;
+    overflow-x: auto;
+    margin-left: 0px;
+    margin-bottom: 20px;
+    border: 3px solid #6415ED;
+    background-color: white;
+}
+
+#tableauContainer2 {
+    box-shadow: 0 0 0 3px black;
+    width: 100%;
+    min-height: 140px;
+    overflow-x: auto;
+    margin-left: 0px;
+    margin-bottom: 20px;
+    border: 3px solid #6415ED;
+    background-color: white;
+}
+
+#tableauDiv {
+    width: 100%;
+    margin: auto;
+    max-width: 1000px;
+}
+
+
+
+
+#premiseAddButton, #resPremiseAddButton {
+    background-color: beige;
+    margin:5px;
+}
+
+/*
+#resetButton {
+    box-shadow: 
+        0 0 0 5px indianred,
+        0 0 0 10px hsl(0, 0%, 90%);
+    background-color: black;
+    color: red;
+    text-emphasis;
+    font-weight:bolder;
+    
+}
+*/
+
+#conclAddButton, #resConclAddButton {
+    background-color: beige;
+    color: black;
+    margin:5px;
+}
+
+.text {
+    width: 100%;
+}
+
+
+#tableauDiv tr, #tableDiv tr { display: block; float: left}
+#tableauDiv th, #tableauDiv td, #tableDiv th, #tableDiv td { display: block; height: 30px}
+
+.column {
+    border: 3px solid #222930;
+    /*outline-offset: 5px;*/
+}
+
+.dropdown:hover .dropdown-menu {
+display: block;
+}
+
+#truthTable td {
+    border-bottom: 1px solid black;
+}
+
+#inputForm1 {
+    border: 1;
+    width: 100%;
+    float: none !important;
+    margin-top: 10px;
+}
+
+.propLists {
+}
+.darkText {
+    color:black;
+}
+
+#propAddButton {
+    background-color: beige;
+}
+
+tr, td {
+    text-align: center;
+}
+
+.propLists tr {border: solid; height: 30px;}
+
+.nav {
+    display: inline-block;
+}
+#resolutionDiv {
+    overflow-x: auto;
+    break-inside: avoid;
+    
+}
+.jumbotron {
+    position: relative;
+    background-color: #E9E9E9 !important;
+    border-bottom: 3px solid #6415ED;
+    box-shadow: 0 0 0 3px black;
+}
+
+.container-fluid {
+    position: relative;
+    margin-top: -20px;
+}
+
+.lightText {
+    color: #E9E9E9 !important;
+}
+.blah {
+}
+
+#leftColumn {
+    border: 3px solid #6415ED;
+    box-shadow: 0 0 0 3px black;
+    background-color: #E9E9E9;
+    margin-bottom: 20px;
+}
+#noteTable {
+}
+#mrtT {
+    break-inside: avoid;
+    break-after: avoid;
+    break-before: avoid;
+}
+#masterResTable{
+}
+.lightRow {
+    background-color: #E9E9E9;
+}
+.middle {
+    margin-bottom: 40px
+}
+
+#rightColumn {
+    border: 3px solid black;
+    padding-top: 10px;
+    border: 3px solid #6415ED;
+    box-shadow: 0 0 0 3px black;
+    background-color: #E9E9E9;
+    margin-bottom: 20px;
+}
+
+.full {
+    border-top: 3px solid #6415ED;
+    box-shadow: 0 0 0 3px black;
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: #E9E9E9;
+}
+#radioLabel {
+    margin-right: 10px;
+    padding-top: 2px;
+}
+#CNFExamples {
+    margin: auto;
+    margin-bottom: 10px;
+}
+#radioGroup {
+    margin: auto;
+    padding: 2px;
+    margin-bottom: 10px;
+    border: 3px solid #6415ED;
+    box-shadow: 0 0 0 3px black;
+    width: 100%;
+    background-color: white;
+}
+
+.radio-inline {
+    padding-top: 2px;
+    padding-right: 5px;
+}
+
+#ExampleList {
+    width: auto;
+    margin: auto;
+    margin-bottom: 20px;
+    font-size: x-large;
+}
+
+/*Used to put a transparent background image*/
+.random {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.08;
+    background-image: url('https://larvalsubjects.files.wordpress.com/2008/11/0198610130truth-function1.jpg');
+    background-repeat: repeat;
+    background-position: 50% 0;
+    -ms-background-size: cover;
+    -o-background-size: cover;
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    background-size: contain;
+}
+.rowStyle {
+    overflow-x: auto;
+}
+#truthTable tbody {
+    overflow: auto;
+}
+#truthTable {
+    opacity: 1 !important;
+    border-collapse: collapse;
+    margin: auto;
+    box-shadow: 
+        0 0 0 5px hsl(0, 0%, 80%),
+        0 0 0 10px hsl(0, 0%, 90%);
+    visibility: hidden;
+    width: auto;
+    overflow-x: auto;
+    overflow-y: auto;
+    margin-bottom: 5px !important;
+}
+#truthTable tr, #truthTable td {
+    white-space: nowrap
+}
+#resTable, #masterTable {
+    text-align: center;
+    margin: auto;
+}
+#masterResTable {
+    border-collapse: collapse;
+    margin: auto;
+    overflow-x: auto;
+    
+}
+#resTable td, #resTable tr {
+    margin: auto;
+}
+#resTableTD {
+    /*float: left;*/
+    /*margin-right: 20px;*/
+}
+#noteTableTD {
+    /*float: right;*/
+    /*margin-left: 20px;*/
+}
+#truthTable td {
+    padding: 5px;
+    border-right: 2px solid black;
+    border-right-width: medium
+}
+#tableDiv {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    vertical-align:middle;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: auto;
+    overflow: auto;
+}
+#tableDiv2 {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    vertical-align:middle;
+    padding-left: 15px;
+    padding-right: 15px;
+    max-height: 200px;
+    overflow: auto;
+}
+
+#truthTable td {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+;

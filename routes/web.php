@@ -19,5 +19,7 @@ Route::group(['middleware' => 'guest'], function () {
 	Route::get('/home',['as'=>'home','uses'=>'HomeController@index']);
 	Route::get('/karnaughsolver',['as'=>'karnaughsolver','uses'=>'KarnaughSolverController@index']);
 	Route::get('/quinemccluskey',['as'=>'quinemccluskey','uses'=>'QuineMccluskeyController@index']);
+	Route::get('/resolutionProver',['as'=>'resolutionProver','uses'=>'ResolutionProverController@index']);
+	Route::get('/simplifyExpression',['as'=>'simplifyExpression','uses'=>'SimplifyExpressionController@index']);
 	Route::get('/info',['as'=>'info','uses'=>'InfoController@index']);
 });

@@ -45,11 +45,11 @@
                         <p>Biểu thức logic</p>
                     </a> 
                     <div class="dropdown-container">
-                        <a href="#">
+                        <a href="{{route('resolutionProver')}}">
                             <i class="pe-7s-angle-right"></i>
                             <p>Kiểm tra suy luận</p>
                         </a>
-                         <a href="#">
+                        <a href="{{route('simplifyExpression')}}">
                             <i class="pe-7s-angle-right"></i>
                             <p>Rút gọn biểu thức</p>
                         </a>
