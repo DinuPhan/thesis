@@ -43,8 +43,7 @@
     background-color: white;
 }
 
-#premiseAddButton, #resPremiseAddButton,
-#conclAddButton, #resConclAddButton{
+#expressionAddButton {
     background: #1baaf3;
     -webkit-border-top-right-radius: 3px;
     -moz-border-radius-topright: 3px;
@@ -94,6 +93,7 @@
     font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
     border: none;
     padding-top: 5px;
+    margin-bottom: 20px;
 }
 
 .otherDiff, #resultLine {

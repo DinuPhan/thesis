@@ -32,9 +32,9 @@
                     </tr>
                 </table>
 
-                {{-- <br>
+                <br>
                     <button id="resetButton" onclick="resetTableau()" type="button" class="btn btn-default">RESET</button>
-                <br> --}}
+                <br>
                 <div class="propLists">
                     <h4 class='diff'><b>Giả thiết:</b></h4>
                     <table class="table" id="premiseTable">

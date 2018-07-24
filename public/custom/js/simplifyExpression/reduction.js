@@ -330,33 +330,47 @@ function resolution(inputString) {
 };
 
 //resolution('ApNp');
-
-function submitResConcl() {
-    var conclusion = document.getElementById("inputResConclusion").value;
-    document.getElementById("inputResConclusion").value='';
-    if (!validateInput(conclusion)) {
-        conclusion = translate(conclusion);
-        if (/undefined/.test(conclusion)) {
+function addExpression() {
+    // Add a premise to the premise list
+    var theTable = document.getElementById("premiseTable");
+    var newExpression = document.getElementById("inputExpression").value;
+    // Check if the input is valid
+    if (!validateInput(newExpression)) {
+        newExpression = translate(newExpression);
+        if (/undefined/.test(newExpression)) {
             alert("Biểu thức không hợp lệ");
-            document.getElementById("inputResConclusion").value='';
             return;
         };
-        if (!validateInput(conclusion)) {
+        if (!validateInput(newExpression)) {
             alert("Biểu thức không hợp lệ");
-            document.getElementById("inputResConclusion").value='';
             return;
         };
     };
-    var theTable = document.getElementById("conclusionTable");
-    var newRow = theTable.insertRow(0);
-    newRow.style.width = 'inherit';
-    newRow.style.overflow = 'hidden';
-    var newTD = newRow.insertCell(0);
-    newTD.style.width = 'inherit';
-    newTD.style.overflow = 'hidden';
-    newTD.style.fontSize = "15px";
-    newTD.innerHTML += reverseTranslate(conclusion);
-    theClauseArray.push(['N'+conclusion]);
+    // Create new row and TD and add proposition to TD
+    var newRow = document.createElement("TR");
+    newRow.style.width = 'auto';
+    theTable.appendChild(newRow);
+    var newTD = document.createElement("TD");
+    newTD.innerHTML += reverseTranslate(newExpression);
+    newTD.style.float = "left";
+    newTD.style.width = "90%";
+    newTD.style.fontSize = "13px";
+    newTD.style.paddingLeft = "10%";
+    
+    newRow.appendChild(newTD);
+    var newTDX = document.createElement("TD");
+    newTDX.style.width = "10%";
+    newRow.appendChild(newTDX);
+    // Add "cancel" button to the premise row
+    var newTDXButton = document.createElement("BUTTON");
+    newTDXButton.className = "buttonClass";
+    newTDXButton.innerHTML +='Bỏ';
+    newTDXButton.style.backgroundColor = 'inherit';
+    newTDXButton.style.border = '0';
+    newTDX.appendChild(newTDXButton);
+    newTDXButton.addEventListener("click", function(){theTable.deleteRow(newRow.rowIndex); theClauseArray.splice(theClauseArray.indexOf([newTD.innerHTML]),1)});
+    theClauseArray.push([newExpression]);
+    console.log('theClauseArray',theClauseArray);
     var result1 = CNFConvert(theClauseArray);
     checkResClosed(result1)?document.getElementById("resultLine").innerHTML+="<span style=\"color: #4CBB17\"><b>ĐÚNG!</b><span>":document.getElementById("resultLine").innerHTML+="<span style=\"color: #FF2400\"><b>SAI</b><span>";
     disableResButtons();
@@ -380,18 +394,14 @@ function resetTableau() {
     document.getElementById("premiseTable").innerHTML = "";
     document.getElementById("conclusionTable").innerHTML = "";
     document.getElementById("resultLine").innerHTML = "<b>The argument is: </b>";
-    document.getElementById("inputResPremise").value='';
-    document.getElementById("inputResConclusion").value='';
+    document.getElementById("inputExpression").value='';
 };
 
 function disableResButtons() {
     // Disable the buttons at start of derivation
-    document.getElementById("resPremiseAddButton").disabled= true;
-    document.getElementById("resConclAddButton").disabled= true;
-    document.getElementById("inputResPremise").onkeydown='';
-    document.getElementById("inputResConclusion").onkeydown='';
-    document.getElementById("inputResPremise").removeEventListener("keydown",submitResPremiseFunction);
-    document.getElementById("inputResConclusion").removeEventListener("keydown",submitResConclFunction);
+    document.getElementById("expressionAddButton").disabled= true;
+    document.getElementById("inputExpression").onkeydown='';
+    document.getElementById("inputExpression").removeEventListener("keydown",submitExpressionFunction);
     var buttonList = document.getElementsByClassName("buttonClass");
     for (i=0;i<buttonList.length;i++) {
         buttonList[i].disabled = true;
@@ -400,70 +410,22 @@ function disableResButtons() {
 
 function enableButtons() {
     // Turns the buttons back on after "Reset"
-    document.getElementById("resPremiseAddButton").disabled= false;
+    document.getElementById("expressionAddButton").disabled= false;
     document.getElementById("resConclAddButton").disabled= false;
-    document.getElementById("inputResPremise").addEventListener("keydown",submitResPremiseFunction);
-    document.getElementById("inputResConclusion").addEventListener("keydown",submitResConclFunction);
+    document.getElementById("inputExpression").addEventListener("keydown",submitExpressionFunction);
 };
 
-function submitResPremise() {
+function submitExpression() {
     // Add premise to premise list, reset text field
-    addResPremise();
-    document.getElementById("inputResPremise").value='';
+    addExpression();
+    document.getElementById("inputExpression").value='';
 };
 
-function addResPremise() {
-    // Add a premise to the premise list
-    var theTable = document.getElementById("premiseTable");
-    var newPremise = document.getElementById("inputResPremise").value;
-    // Check if the input is valid
-    if (!validateInput(newPremise)) {
-        newPremise = translate(newPremise);
-        if (/undefined/.test(newPremise)) {
-            alert("Biểu thức không hợp lệ");
-            return;
-        };
-        if (!validateInput(newPremise)) {
-            alert("Biểu thức không hợp lệ");
-            return;
-        };
-    };
-    // Create new row and TD and add proposition to TD
-    var newRow = document.createElement("TR");
-    newRow.style.width = 'auto';
-    theTable.appendChild(newRow);
-    var newTD = document.createElement("TD");
-    newTD.innerHTML += reverseTranslate(newPremise);
-    newTD.style.float = "left";
-    newTD.style.width = "90%";
-    newTD.style.fontSize = "13px";
-    newTD.style.paddingLeft = "20%";
-    
-    newRow.appendChild(newTD);
-    var newTDX = document.createElement("TD");
-    newTDX.style.width = "10%";
-    newRow.appendChild(newTDX);
-    // Add "cancel" button to the premise row
-    var newTDXButton = document.createElement("BUTTON");
-    newTDXButton.className = "buttonClass";
-    newTDXButton.innerHTML +='Bỏ';
-    newTDXButton.style.backgroundColor = 'inherit';
-    newTDXButton.style.border = '0';
-    newTDX.appendChild(newTDXButton);
-    newTDXButton.addEventListener("click", function(){theTable.deleteRow(newRow.rowIndex); theClauseArray.splice(theClauseArray.indexOf([newTD.innerHTML]),1)});
-    theClauseArray.push([newPremise]);
-};
 
-function submitResPremiseFunction(inputKey) {
+
+function submitExpressionFunction(inputKey) {
     if(inputKey == '13'){
-        submitResPremise();
-    };
-};
-
-function submitResConclFunction(inputKey) {
-    // Adds the conclusion on "Enter"
-    if(inputKey == '13') {
-        submitResConcl();
+        submitExpression();
     };
 };
 
@@ -572,17 +534,11 @@ function lightResTable() {
 };
 
 
-$(function() {
-    $("#inputResConclusion").on('keydown', function(event) {
-        var inputKey = 'which' in event? event.which : event.keyCode;
-        submitResConclFunction(inputKey);
-    })
-});
 
 $(function() {
-    $("#inputResPremise").on('keydown', function(event) {
+    $("#inputExpression").on('keydown', function(event) {
         var inputKey = 'which' in event? event.which : event.keyCode;
-        submitResPremiseFunction(inputKey);
+        submitExpressionFunction(inputKey);
     })
 });
 
